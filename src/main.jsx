@@ -8,6 +8,8 @@ import "./main.css";
 
 import Home from "./routes/index.jsx";
 import Layout from "./Layout.jsx";
+import Error from "./Error.jsx";
+import NotFound from "./404.jsx";
 
 const theme = createTheme({
   /** Put your mantine theme override here */
@@ -17,7 +19,11 @@ const router = createBrowserRouter([
   {
     path: "/",
     Component: Layout,
-    children: [{ index: true, Component: Home }],
+    errorElement: <Error />,
+    children: [
+      { index: true, Component: Home },
+      { path: "*", Component: NotFound },
+    ],
   },
 ]);
 

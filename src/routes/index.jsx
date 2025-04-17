@@ -19,7 +19,6 @@ import { useDisclosure } from "@mantine/hooks";
 
 function Home() {
   const [applications, setApplications] = useState([]);
-  const [fetching, setFetching] = useState(false);
 
   const fillApplications = async () => {
     const response = localStorageAPI.fetchApplications();
