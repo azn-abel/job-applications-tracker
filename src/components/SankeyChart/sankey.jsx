@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from "react";
 import { sankey, sankeyLinkHorizontal } from "d3-sankey";
+import { useMediaQuery } from "@mantine/hooks";
 import * as d3 from "d3";
 
 const SankeyChart = ({
@@ -12,6 +13,8 @@ const SankeyChart = ({
   interviewsRejected,
 }) => {
   const ref = useRef();
+
+  const smallScreen = useMediaQuery("max-width: 512px");
 
   useEffect(() => {
     const width = 600;
@@ -127,13 +130,14 @@ const SankeyChart = ({
       .style("border-radius", "4px")
       .style("pointer-events", "none")
       .style("display", "none")
-      .style("min-width", "25%");
+      .style("max-width", "50%");
 
     svg
       .selectAll("path")
       .on("mousemove", function (event, d) {
         let companies = d.apps?.map((app) => app.company) || ["N/A"];
         companies = [...new Set(companies)];
+        companies.sort();
 
         tooltip
           .style("display", "block")
@@ -153,23 +157,26 @@ const SankeyChart = ({
       .on("mousemove", function (event, d) {
         let companies = d.apps?.map((app) => app.company) || ["N/A"];
         companies = [...new Set(companies)];
+        companies.sort();
+
+        const rightSide = ["No Response", "Offers", "Rejected"].includes(
+          d.name
+        );
+
+        if (rightSide) tooltip.style("width", "25%");
 
         tooltip
           .style("display", "block")
           .style("top", event.pageY + 10 + "px")
-          .style(
-            "left",
-            event.pageX + (d.name === "No Response" ? 0 : 10) + "px"
-          )
-          .style(
-            "transform",
-            `translate(${d.name === "No Response" ? "-100%" : 0}, 0)`
-          )
+          .style("left", event.pageX + (rightSide ? 0 : 10) + "px")
+          .style("transform", `translate(${rightSide ? "-100%" : 0}, 0)`)
           .html(
             `<strong>${d.name}</strong><br/>Companies: ${companies.join(", ")}`
           );
       })
-      .on("mouseout", () => tooltip.style("display", "none"));
+      .on("mouseout", () =>
+        tooltip.style("display", "none").style("width", "fit-content")
+      );
   }, []);
 
   return (
