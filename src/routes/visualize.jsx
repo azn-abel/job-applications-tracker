@@ -20,36 +20,29 @@ export default function Visualize() {
   useEffect(() => {
     const data = localStorageAPI.fetchApplications();
 
-    const applicationCount = data.length;
-    const interviewCount = data.filter(
-      (item) =>
-        ["Interview", "Offer"].includes(item.status) || item.interviewDate
-    ).length;
-    const offerCount = data.filter((item) => item.status === "Offer").length;
-    const noResponseCount = data.filter((item) =>
-      ["Interview", "New", "Assessment"].includes(item.status)
-    ).length;
-    const rejectionsNoInterviewCount = data.filter(
-      (item) => !item.interviewDate && item.status === "Rejected"
-    ).length;
-    const applicationsNoResponseCount = data.filter((item) =>
-      ["New", "Assessment"].includes(item.status)
-    ).length;
-    const interviewNoResponseCount = data.filter(
-      (item) => item.status === "Interview"
-    ).length;
-    const interviewsRejectedCount = data.filter(
-      (item) => item.status === "Rejected" && item.interviewDate
-    ).length;
-
-    setApplications(applicationCount);
-    setInterviews(interviewCount);
-    setOffers(offerCount);
-    setNoResponse(noResponseCount);
-    setRejectionsNoInterview(rejectionsNoInterviewCount);
-    setApplicationsNoResponse(applicationsNoResponseCount);
-    setInterviewsNoResponse(interviewNoResponseCount);
-    setInterviewsRejected(interviewsRejectedCount);
+    setApplications(data);
+    setInterviews(
+      data.filter(
+        (item) =>
+          ["Interview", "Offer"].includes(item.status) || item.interviewDate
+      )
+    );
+    setOffers(data.filter((item) => item.status === "Offer"));
+    setNoResponse(
+      data.filter((item) =>
+        ["Interview", "New", "Assessment"].includes(item.status)
+      )
+    );
+    setRejectionsNoInterview(
+      data.filter((item) => !item.interviewDate && item.status === "Rejected")
+    );
+    setApplicationsNoResponse(
+      data.filter((item) => ["New", "Assessment"].includes(item.status))
+    );
+    setInterviewsNoResponse(data.filter((item) => item.status === "Interview"));
+    setInterviewsRejected(
+      data.filter((item) => item.status === "Rejected" && item.interviewDate)
+    );
 
     setLoading(false);
   }, []);

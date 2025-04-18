@@ -18,21 +18,47 @@ const SankeyChart = ({
     const height = 300;
 
     const rawNodes = [
-      { name: "Applications" }, // 0
-      { name: "Interviews" }, // 1
-      { name: "Offers" }, // 2
-      { name: "Rejected" }, // 3
-      { name: "No Response" }, // 4
+      { name: "Applications", apps: applications }, // 0
+      { name: "Interviews", apps: interviews }, // 1
+      { name: "Offers", apps: offers }, // 2
+      {
+        name: "Rejected",
+        apps: [...rejectionsNoInterview, ...interviewsRejected],
+      }, // 3
+      {
+        name: "No Response",
+        apps: [...applicationsNoResponse, ...interviewsNoResponse],
+      }, // 4
     ];
 
     const rawLinks = [
-      { source: 0, target: 1, value: interviews },
-      { source: 0, target: 3, value: rejectionsNoInterview },
-      { source: 0, target: 4, value: applicationsNoResponse },
+      { source: 0, target: 1, value: interviews.length, apps: interviews },
+      {
+        source: 0,
+        target: 3,
+        value: rejectionsNoInterview.length,
+        apps: rejectionsNoInterview,
+      },
+      {
+        source: 0,
+        target: 4,
+        value: applicationsNoResponse.length,
+        apps: applicationsNoResponse,
+      },
 
-      { source: 1, target: 2, value: offers },
-      { source: 1, target: 3, value: interviewsRejected },
-      { source: 1, target: 4, value: interviewsNoResponse },
+      { source: 1, target: 2, value: offers.length, apps: offers },
+      {
+        source: 1,
+        target: 3,
+        value: interviewsRejected.length,
+        apps: interviewsRejected,
+      },
+      {
+        source: 1,
+        target: 4,
+        value: interviewsNoResponse.length,
+        apps: interviewsNoResponse,
+      },
     ];
 
     const filteredLinks = rawLinks.filter((link) => link.value > 0);
@@ -90,6 +116,51 @@ const SankeyChart = ({
       .attr("x", (d) => d.x1 + 6)
       .attr("text-anchor", "start")
       .text((d) => `${d.name} (${d.value || 0})`);
+
+    const tooltip = d3
+      .select("body")
+      .append("div")
+      .style("position", "absolute")
+      .style("padding", "6px 12px")
+      .style("background", "rgba(0,0,0,0.75)")
+      .style("color", "white")
+      .style("border-radius", "4px")
+      .style("pointer-events", "none")
+      .style("display", "none");
+
+    svg
+      .selectAll("path")
+      .on("mousemove", function (event, d) {
+        let companies = d.apps?.map((app) => app.company) || ["N/A"];
+        companies = [...new Set(companies)];
+
+        tooltip
+          .style("display", "block")
+          .style("top", event.pageY + 10 + "px")
+          .style("left", event.pageX + 10 + "px")
+          .html(
+            `<strong>${d.source.name} → ${
+              d.target.name
+            }</strong><br/>Companies: ${companies.join(", ")}`
+          );
+      })
+      .on("mouseout", () => tooltip.style("display", "none"));
+
+    svg
+      .selectAll("rect")
+      .on("mousemove", function (event, d) {
+        let companies = d.apps?.map((app) => app.company) || ["N/A"];
+        companies = [...new Set(companies)];
+
+        tooltip
+          .style("display", "block")
+          .style("top", event.pageY + 10 + "px")
+          .style("left", event.pageX + 10 + "px")
+          .html(
+            `<strong>${d.name}</strong><br/>Companies: ${companies.join(", ")}`
+          );
+      })
+      .on("mouseout", () => tooltip.style("display", "none"));
   }, []);
 
   return (
