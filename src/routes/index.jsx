@@ -76,7 +76,8 @@ function Home() {
           mb={24}
           radius={8}
           shadow="md"
-          style={{ overflow: "scroll" }}
+          style={{ overflowX: "scroll" }}
+          className="hide-scroll"
         >
           <ApplicationsTable
             applications={applications}
