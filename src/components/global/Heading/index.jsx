@@ -1,5 +1,5 @@
 import { Container, Text, Group } from "@mantine/core";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import classes from "./Heading.module.css";
 
 import { Link } from "react-router";
@@ -24,6 +24,21 @@ export default function Heading() {
       {link.label}
     </Link>
   ));
+
+  useEffect(() => {
+    const handlePathChange = () => {
+      setActive(window.location.pathname);
+    };
+
+    window.addEventListener("popstate", handlePathChange);
+    window.addEventListener("locationchange", handlePathChange);
+
+    return () => {
+      window.removeEventListener("popstate", handlePathChange);
+      window.removeEventListener("locationchange", handlePathChange);
+    };
+  }, []);
+
   return (
     <header
       className={classes.header}
