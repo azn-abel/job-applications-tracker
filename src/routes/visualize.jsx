@@ -1,10 +1,12 @@
 import { useState, useEffect } from "react";
-import { Flex } from "@mantine/core";
+import { Flex, Title } from "@mantine/core";
 import localStorageAPI from "../api/applications";
 
 import SankeyChart from "../components/SankeyChart/sankey";
 
 export default function Visualize() {
+  const [loading, setLoading] = useState(true);
+
   const [applications, setApplications] = useState(0);
   const [interviews, setInterviews] = useState(0);
   const [offers, setOffers] = useState(0);
@@ -48,7 +50,23 @@ export default function Visualize() {
     setApplicationsNoResponse(applicationsNoResponseCount);
     setInterviewsNoResponse(interviewNoResponseCount);
     setInterviewsRejected(interviewsRejectedCount);
+
+    setLoading(false);
   }, []);
+
+  if (loading)
+    return (
+      <Flex justify="center" align="start">
+        <Title>Loading...</Title>
+      </Flex>
+    );
+
+  if (!loading && !applications)
+    return (
+      <Flex justify="center" align="start">
+        <Title>Nothing to show.</Title>
+      </Flex>
+    );
 
   return (
     <Flex justify="center" align="start">

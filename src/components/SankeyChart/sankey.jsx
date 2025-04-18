@@ -6,7 +6,6 @@ const SankeyChart = ({
   applications,
   interviews,
   offers,
-  noResponse,
   rejectionsNoInterview,
   applicationsNoResponse,
   interviewsNoResponse,
@@ -29,13 +28,8 @@ const SankeyChart = ({
     const rawLinks = [
       { source: 0, target: 1, value: interviews },
       { source: 0, target: 3, value: rejectionsNoInterview },
-      {
-        source: 0,
-        target: 4,
-        value: applicationsNoResponse,
-      },
+      { source: 0, target: 4, value: applicationsNoResponse },
 
-      // Interviews → Offers or Drop
       { source: 1, target: 2, value: offers },
       { source: 1, target: 3, value: interviewsRejected },
       { source: 1, target: 4, value: interviewsNoResponse },
@@ -96,7 +90,7 @@ const SankeyChart = ({
       .attr("x", (d) => d.x1 + 6)
       .attr("text-anchor", "start")
       .text((d) => `${d.name} (${d.value || 0})`);
-  }, [applications, interviews, offers]);
+  }, []);
 
   return (
     <svg

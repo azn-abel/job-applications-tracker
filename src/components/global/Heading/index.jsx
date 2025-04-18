@@ -29,9 +29,7 @@ export default function Heading() {
     >
       <Container size="md" className={classes.inner}>
         <Text>Job Tracker</Text>
-        <Group gap={5} visibleFrom="xs">
-          {items}
-        </Group>
+        <Group gap={5}>{items}</Group>
       </Container>
     </header>
   );
