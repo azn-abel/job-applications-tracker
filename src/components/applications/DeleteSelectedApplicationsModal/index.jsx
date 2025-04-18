@@ -19,6 +19,7 @@ export default function DeleteSelectedApplicationModal({ callback }) {
       console.log(row);
       localStorageAPI.deleteApplication(row);
     }
+    setSelectedRows([]);
     close();
     callback();
   };

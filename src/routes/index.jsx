@@ -31,7 +31,7 @@ import classes from "./Index.module.css";
 
 import localStorageAPI from "../api/applications";
 
-import { useDisclosure } from "@mantine/hooks";
+import { useDisclosure, useMediaQuery } from "@mantine/hooks";
 
 import { useAtom } from "jotai";
 import { selectedRowsAtom } from "../atoms";
@@ -39,6 +39,8 @@ import { selectedRowsAtom } from "../atoms";
 function Home() {
   const [applications, setApplications] = useState([]);
   const [selectedRows, setSelectedRows] = useAtom(selectedRowsAtom);
+
+  const smallScreen = useMediaQuery("(max-width: 512px)");
 
   const fillApplications = async () => {
     const response = localStorageAPI.fetchApplications();
@@ -61,29 +63,29 @@ function Home() {
         <Grid mt={24} mb={24}>
           <Grid.Col span={4}>
             <Card shadow="md" radius={8}>
-              <Title>{applications?.length || 0}</Title>
-              <Text>Applications</Text>
+              <Title order={2}>{applications?.length || 0}</Title>
+              <Text size={smallScreen ? "xs" : "md"}>Applications</Text>
             </Card>
           </Grid.Col>
           <Grid.Col span={4}>
             <Card shadow="md" radius={8}>
-              <Title>
+              <Title order={2}>
                 {applications?.filter(
                   (ele) =>
                     ["Interview", "Offer"].includes(ele.status) ||
                     ele.interviewDate
                 ).length || 0}
               </Title>
-              <Text>Interviews</Text>
+              <Text size={smallScreen ? "xs" : "md"}>Interviews</Text>
             </Card>
           </Grid.Col>
           <Grid.Col span={4}>
             <Card shadow="md" radius={8}>
-              <Title>
+              <Title order={2}>
                 {applications?.filter((ele) => ele.status === "Offer").length ||
                   0}
               </Title>
-              <Text>Offers</Text>
+              <Text size={smallScreen ? "xs" : "md"}>Offers</Text>
             </Card>
           </Grid.Col>
         </Grid>
