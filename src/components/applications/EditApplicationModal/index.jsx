@@ -53,7 +53,7 @@ export default function EditApplicationModal({
     body.interviewDate = formatDate(body.interviewDate);
     body.applicationDate = formatDate(body.applicationDate);
 
-    if (body.interviewDate && ["Offer", "Assessment"].includes(body.status))
+    if (body.interviewDate && ["New", "Assessment"].includes(body.status))
       body.status = "Interview";
 
     setFetching(true);
