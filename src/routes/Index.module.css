@@ -19,3 +19,7 @@
   height: 21px;
   border-radius: 21px;
 }
+
+.rowSelected {
+  background-color: var(--mantine-color-blue-light);
+}

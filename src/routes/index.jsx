@@ -6,14 +6,16 @@ import {
   Grid,
   Text,
   TextInput,
-  Table,
   Flex,
   LoadingOverlay,
   UnstyledButton,
-  Group,
   Center,
   keys,
+  Checkbox,
+  Group,
+  Table,
 } from "@mantine/core";
+import cx from "clsx";
 import {
   IconChevronDown,
   IconChevronUp,
@@ -23,6 +25,7 @@ import {
 
 import AddApplicationModal from "../components/applications/AddApplicationModal";
 import EditApplicationModal from "../components/applications/EditApplicationModal";
+import DeleteSelectedApplicationModal from "../components/applications/DeleteSelectedApplicationsModal";
 
 import classes from "./Index.module.css";
 
@@ -30,8 +33,12 @@ import localStorageAPI from "../api/applications";
 
 import { useDisclosure } from "@mantine/hooks";
 
+import { useAtom } from "jotai";
+import { selectedRowsAtom } from "../atoms";
+
 function Home() {
   const [applications, setApplications] = useState([]);
+  const [selectedRows, setSelectedRows] = useAtom(selectedRowsAtom);
 
   const fillApplications = async () => {
     const response = localStorageAPI.fetchApplications();
@@ -82,7 +89,12 @@ function Home() {
         </Grid>
         <Flex justify="space-between">
           <Title order={2}>Applications</Title>
-          <AddApplicationModal callback={fillApplications} />
+          <Flex gap={12}>
+            {selectedRows?.length > 0 && (
+              <DeleteSelectedApplicationModal callback={fillApplications} />
+            )}
+            <AddApplicationModal callback={fillApplications} />
+          </Flex>
         </Flex>
         <Card
           mt={24}
@@ -112,6 +124,21 @@ function ApplicationsTable({ applications, callback }) {
 
   const [selectedApplication, setSelectedApplication] = useState({});
 
+  const [selection, setSelection] = useAtom(selectedRowsAtom);
+
+  const toggleRow = (id) =>
+    setSelection((current) =>
+      current.includes(id)
+        ? current.filter((item) => item !== id)
+        : [...current, id]
+    );
+  const toggleAll = () =>
+    setSelection((current) =>
+      current.length === applications?.length
+        ? []
+        : applications?.map((item) => item.id)
+    );
+
   useEffect(() => {
     setSortedApplications(applications);
   }, [applications]);
@@ -137,39 +164,35 @@ function ApplicationsTable({ applications, callback }) {
     );
   };
 
-  const sortedRows = sortedApplications.map((application, index) => (
-    <Table.Tr
-      key={index}
-      onClick={() => {
-        setSelectedApplication({ ...application });
-        open();
-      }}
-      style={{ cursor: "pointer" }}
-    >
-      <Table.Td>{application.jobTitle}</Table.Td>
-      <Table.Td>{application.company}</Table.Td>
-      <Table.Td>{application.status}</Table.Td>
-      <Table.Td>{application.applicationDate}</Table.Td>
-      <Table.Td>{application.interviewDate}</Table.Td>
-    </Table.Tr>
-  ));
-
-  const rows = applications?.map((application, index) => (
-    <Table.Tr
-      key={index}
-      onClick={() => {
-        setSelectedApplication({ ...application });
-        open();
-      }}
-      style={{ cursor: "pointer" }}
-    >
-      <Table.Td>{application.jobTitle}</Table.Td>
-      <Table.Td>{application.company}</Table.Td>
-      <Table.Td>{application.status}</Table.Td>
-      <Table.Td>{application.applicationDate}</Table.Td>
-      <Table.Td>{application.interviewDate}</Table.Td>
-    </Table.Tr>
-  ));
+  const sortedRows = sortedApplications.map((application, index) => {
+    const selected = selection.includes(application.id);
+    return (
+      <Table.Tr
+        key={index}
+        onClick={() => {
+          setSelectedApplication({ ...application });
+          open();
+        }}
+        style={{ cursor: "pointer" }}
+        className={cx({ [classes.rowSelected]: selected })}
+      >
+        <Table.Td>
+          <Checkbox
+            checked={selection.includes(application.id)}
+            onChange={() => {
+              toggleRow(application.id);
+              close();
+            }}
+          />
+        </Table.Td>
+        <Table.Td>{application.jobTitle}</Table.Td>
+        <Table.Td>{application.company}</Table.Td>
+        <Table.Td>{application.status}</Table.Td>
+        <Table.Td>{application.applicationDate}</Table.Td>
+        <Table.Td>{application.interviewDate}</Table.Td>
+      </Table.Tr>
+    );
+  });
 
   return (
     <>
@@ -190,6 +213,16 @@ function ApplicationsTable({ applications, callback }) {
       <Table highlightOnHover>
         <Table.Thead>
           <Table.Tr>
+            <Table.Th w={40}>
+              <Checkbox
+                onChange={toggleAll}
+                checked={selection.length === applications?.length}
+                indeterminate={
+                  selection.length > 0 &&
+                  selection.length !== applications?.length
+                }
+              />
+            </Table.Th>
             <Th
               sorted={sortBy === "jobTitle"}
               reversed={reverseSortDirection}

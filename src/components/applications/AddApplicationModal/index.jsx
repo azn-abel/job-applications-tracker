@@ -142,7 +142,7 @@ export default function AddApplicationModal({ callback }) {
       </Modal>
 
       <Button variant="default" onClick={open}>
-        Add Application
+        Add
       </Button>
     </>
   );
