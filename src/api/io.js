@@ -1,3 +1,6 @@
+import Papa from "papaparse";
+import localStorageAPI from "./applications";
+
 export function downloadCSV(data, filename = "job_applications.csv") {
   if (!data.length) return;
 
@@ -13,6 +16,8 @@ export function downloadCSV(data, filename = "job_applications.csv") {
 
       // write rows
       for (const obj of data) {
+        if (!obj.interviewDate) obj.interviewDate = "";
+        if (!obj.applicationDate) obj.applicationDate = "";
         const row = headers.map((key) => escape(obj[key]));
         controller.enqueue(encoder.encode(row.join(",") + "\n"));
       }
@@ -30,5 +35,25 @@ export function downloadCSV(data, filename = "job_applications.csv") {
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
+  });
+}
+
+export function importCSV(file) {
+  const ids = localStorageAPI.fetchApplications().map((row) => row.id);
+  const results = [];
+  const handleResult = (result) => {
+    if (!result.interviewDate || result.interviewDate === "null")
+      result.interviewDate = "";
+    if (!ids.includes(result.data.id)) results.push(result.data);
+  };
+  return new Promise((resolve, reject) => {
+    Papa.parse(file, {
+      header: true,
+      skipEmptyLines: true,
+      step: handleResult,
+      dynamicTyping: true,
+      complete: () => resolve(results),
+      error: reject,
+    });
   });
 }

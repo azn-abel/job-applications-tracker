@@ -100,7 +100,7 @@ function Home() {
             {selectedRows?.length === 0 && (
               <>
                 <AddApplicationModal callback={fillApplications} />
-                <ImportApplicationsModal />
+                <ImportApplicationsModal callback={fillApplications} />
               </>
             )}
             {selectedRows?.length > 0 && (
