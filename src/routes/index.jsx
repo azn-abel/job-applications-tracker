@@ -14,6 +14,7 @@ import {
   Checkbox,
   Group,
   Table,
+  Button,
 } from "@mantine/core";
 import cx from "clsx";
 import {
@@ -35,6 +36,7 @@ import { useDisclosure, useMediaQuery } from "@mantine/hooks";
 
 import { useAtom } from "jotai";
 import { selectedRowsAtom } from "../atoms";
+import { downloadCSV } from "../api/io";
 
 function Home() {
   const [applications, setApplications] = useState([]);
@@ -89,13 +91,28 @@ function Home() {
             </Card>
           </Grid.Col>
         </Grid>
-        <Flex justify="space-between">
-          <Title order={2}>Applications</Title>
+        <Flex justify="space-between" wrap="wrap" gap={12}>
           <Flex gap={12}>
+            <Title order={2}>Applications</Title>
+          </Flex>
+          <Flex gap={12}>
+            {selectedRows?.length === 0 && (
+              <AddApplicationModal callback={fillApplications} />
+            )}
             {selectedRows?.length > 0 && (
               <DeleteSelectedApplicationModal callback={fillApplications} />
             )}
-            <AddApplicationModal callback={fillApplications} />
+            {selectedRows?.length > 0 && (
+              <Button
+                onClick={() =>
+                  downloadCSV(
+                    applications.filter((row) => selectedRows.includes(row.id))
+                  )
+                }
+              >
+                Export
+              </Button>
+            )}
           </Flex>
         </Flex>
         <Card
