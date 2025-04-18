@@ -41,6 +41,10 @@ export default function AddApplicationModal({ callback }) {
     const body = { ...values };
     body.applicationDate = formatDate(body.applicationDate);
     body.interviewDate = formatDate(body.interviewDate);
+
+    if (body.interviewDate && ["Offer", "Assessment"].includes(body.status))
+      body.status = "Interview";
+
     setFetching(true);
     const result = localStorageAPI.postApplication(body);
     setFetching(false);
