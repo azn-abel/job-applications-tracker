@@ -42,7 +42,7 @@ export default function AddApplicationModal({ callback }) {
     body.applicationDate = formatDate(body.applicationDate);
     body.interviewDate = formatDate(body.interviewDate);
 
-    if (body.interviewDate && ["Offer", "Assessment"].includes(body.status))
+    if (body.interviewDate && ["New", "Assessment"].includes(body.status))
       body.status = "Interview";
 
     setFetching(true);
