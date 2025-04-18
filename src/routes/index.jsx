@@ -6,14 +6,17 @@ import {
   Grid,
   Text,
   TextInput,
-  Table,
   Flex,
   LoadingOverlay,
   UnstyledButton,
-  Group,
   Center,
   keys,
+  Checkbox,
+  Group,
+  Table,
+  Button,
 } from "@mantine/core";
+import cx from "clsx";
 import {
   IconChevronDown,
   IconChevronUp,
@@ -23,15 +26,23 @@ import {
 
 import AddApplicationModal from "../components/applications/AddApplicationModal";
 import EditApplicationModal from "../components/applications/EditApplicationModal";
+import DeleteSelectedApplicationModal from "../components/applications/DeleteSelectedApplicationsModal";
 
 import classes from "./Index.module.css";
 
 import localStorageAPI from "../api/applications";
 
-import { useDisclosure } from "@mantine/hooks";
+import { useDisclosure, useMediaQuery } from "@mantine/hooks";
+
+import { useAtom } from "jotai";
+import { selectedRowsAtom } from "../atoms";
+import { downloadCSV } from "../api/io";
 
 function Home() {
   const [applications, setApplications] = useState([]);
+  const [selectedRows, setSelectedRows] = useAtom(selectedRowsAtom);
+
+  const smallScreen = useMediaQuery("(max-width: 512px)");
 
   const fillApplications = async () => {
     const response = localStorageAPI.fetchApplications();
@@ -54,35 +65,55 @@ function Home() {
         <Grid mt={24} mb={24}>
           <Grid.Col span={4}>
             <Card shadow="md" radius={8}>
-              <Title>{applications?.length || 0}</Title>
-              <Text>Applications</Text>
+              <Title order={2}>{applications?.length || 0}</Title>
+              <Text size={smallScreen ? "xs" : "md"}>Applications</Text>
             </Card>
           </Grid.Col>
           <Grid.Col span={4}>
             <Card shadow="md" radius={8}>
-              <Title>
+              <Title order={2}>
                 {applications?.filter(
                   (ele) =>
                     ["Interview", "Offer"].includes(ele.status) ||
                     ele.interviewDate
                 ).length || 0}
               </Title>
-              <Text>Interviews</Text>
+              <Text size={smallScreen ? "xs" : "md"}>Interviews</Text>
             </Card>
           </Grid.Col>
           <Grid.Col span={4}>
             <Card shadow="md" radius={8}>
-              <Title>
+              <Title order={2}>
                 {applications?.filter((ele) => ele.status === "Offer").length ||
                   0}
               </Title>
-              <Text>Offers</Text>
+              <Text size={smallScreen ? "xs" : "md"}>Offers</Text>
             </Card>
           </Grid.Col>
         </Grid>
-        <Flex justify="space-between">
-          <Title order={2}>Applications</Title>
-          <AddApplicationModal callback={fillApplications} />
+        <Flex justify="space-between" wrap="wrap" gap={12}>
+          <Flex gap={12}>
+            <Title order={2}>Applications</Title>
+          </Flex>
+          <Flex gap={12}>
+            {selectedRows?.length === 0 && (
+              <AddApplicationModal callback={fillApplications} />
+            )}
+            {selectedRows?.length > 0 && (
+              <DeleteSelectedApplicationModal callback={fillApplications} />
+            )}
+            {selectedRows?.length > 0 && (
+              <Button
+                onClick={() =>
+                  downloadCSV(
+                    applications.filter((row) => selectedRows.includes(row.id))
+                  )
+                }
+              >
+                Export
+              </Button>
+            )}
+          </Flex>
         </Flex>
         <Card
           mt={24}
@@ -112,6 +143,21 @@ function ApplicationsTable({ applications, callback }) {
 
   const [selectedApplication, setSelectedApplication] = useState({});
 
+  const [selection, setSelection] = useAtom(selectedRowsAtom);
+
+  const toggleRow = (id) =>
+    setSelection((current) =>
+      current.includes(id)
+        ? current.filter((item) => item !== id)
+        : [...current, id]
+    );
+  const toggleAll = () =>
+    setSelection((current) =>
+      current.length === applications?.length
+        ? []
+        : applications?.map((item) => item.id)
+    );
+
   useEffect(() => {
     setSortedApplications(applications);
   }, [applications]);
@@ -137,39 +183,35 @@ function ApplicationsTable({ applications, callback }) {
     );
   };
 
-  const sortedRows = sortedApplications.map((application, index) => (
-    <Table.Tr
-      key={index}
-      onClick={() => {
-        setSelectedApplication({ ...application });
-        open();
-      }}
-      style={{ cursor: "pointer" }}
-    >
-      <Table.Td>{application.jobTitle}</Table.Td>
-      <Table.Td>{application.company}</Table.Td>
-      <Table.Td>{application.status}</Table.Td>
-      <Table.Td>{application.applicationDate}</Table.Td>
-      <Table.Td>{application.interviewDate}</Table.Td>
-    </Table.Tr>
-  ));
-
-  const rows = applications?.map((application, index) => (
-    <Table.Tr
-      key={index}
-      onClick={() => {
-        setSelectedApplication({ ...application });
-        open();
-      }}
-      style={{ cursor: "pointer" }}
-    >
-      <Table.Td>{application.jobTitle}</Table.Td>
-      <Table.Td>{application.company}</Table.Td>
-      <Table.Td>{application.status}</Table.Td>
-      <Table.Td>{application.applicationDate}</Table.Td>
-      <Table.Td>{application.interviewDate}</Table.Td>
-    </Table.Tr>
-  ));
+  const sortedRows = sortedApplications.map((application, index) => {
+    const selected = selection.includes(application.id);
+    return (
+      <Table.Tr
+        key={index}
+        onClick={() => {
+          setSelectedApplication({ ...application });
+          open();
+        }}
+        style={{ cursor: "pointer" }}
+        className={cx({ [classes.rowSelected]: selected })}
+      >
+        <Table.Td>
+          <Checkbox
+            checked={selection.includes(application.id)}
+            onChange={() => {
+              toggleRow(application.id);
+              close();
+            }}
+          />
+        </Table.Td>
+        <Table.Td>{application.jobTitle}</Table.Td>
+        <Table.Td>{application.company}</Table.Td>
+        <Table.Td>{application.status}</Table.Td>
+        <Table.Td>{application.applicationDate}</Table.Td>
+        <Table.Td>{application.interviewDate}</Table.Td>
+      </Table.Tr>
+    );
+  });
 
   return (
     <>
@@ -190,6 +232,16 @@ function ApplicationsTable({ applications, callback }) {
       <Table highlightOnHover>
         <Table.Thead>
           <Table.Tr>
+            <Table.Th w={40}>
+              <Checkbox
+                onChange={toggleAll}
+                checked={selection.length === applications?.length}
+                indeterminate={
+                  selection.length > 0 &&
+                  selection.length !== applications?.length
+                }
+              />
+            </Table.Th>
             <Th
               sorted={sortBy === "jobTitle"}
               reversed={reverseSortDirection}
