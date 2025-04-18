@@ -57,14 +57,14 @@ export default function Visualize() {
   if (loading)
     return (
       <Flex justify="center" align="start">
-        <Title>Loading...</Title>
+        <Title order={2}>Loading...</Title>
       </Flex>
     );
 
   if (!loading && !applications)
     return (
       <Flex justify="center" align="start">
-        <Title>Nothing to show.</Title>
+        <Title order={2}>Nothing to show.</Title>
       </Flex>
     );
 

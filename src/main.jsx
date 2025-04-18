@@ -19,7 +19,7 @@ const theme = createTheme({
 const router = createBrowserRouter([
   {
     path: "/",
-    // Component: Layout,
+    Component: Layout,
     errorElement: <Error />,
     children: [
       { index: true, Component: Home },
@@ -31,7 +31,7 @@ const router = createBrowserRouter([
 
 createRoot(document.getElementById("root")).render(
   <MantineProvider theme={theme}>
-    <Heading />
+    {/* <Heading /> */}
     <RouterProvider router={router} />
   </MantineProvider>
 );

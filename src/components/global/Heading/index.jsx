@@ -2,17 +2,19 @@ import { Container, Text, Group } from "@mantine/core";
 import { useState } from "react";
 import classes from "./Heading.module.css";
 
+import { Link } from "react-router";
+
 const links = [
   { link: "/", label: "Home" },
   { link: "/visualize", label: "Visualize" },
 ];
 
 export default function Heading() {
-  const [active, setActive] = useState(window.location.path);
+  const [active, setActive] = useState(window.location.pathname);
   const items = links.map((link) => (
-    <a
+    <Link
       key={link.label}
-      href={link.link}
+      to={link.link}
       className={classes.link}
       data-active={active === link.link || undefined}
       onClick={(event) => {
@@ -20,7 +22,7 @@ export default function Heading() {
       }}
     >
       {link.label}
-    </a>
+    </Link>
   ));
   return (
     <header
@@ -28,7 +30,9 @@ export default function Heading() {
       style={{ zIndex: 200, position: "relative" }}
     >
       <Container size="md" className={classes.inner}>
-        <Text>Job Tracker</Text>
+        <Link to="/" style={{ textDecoration: "none", color: "black" }}>
+          <Text>Job Tracker</Text>
+        </Link>
         <Group gap={5}>{items}</Group>
       </Container>
     </header>
