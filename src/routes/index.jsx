@@ -5,13 +5,26 @@ import {
   Card,
   Grid,
   Text,
+  TextInput,
   Table,
   Flex,
   LoadingOverlay,
+  UnstyledButton,
+  Group,
+  Center,
+  keys,
 } from "@mantine/core";
+import {
+  IconChevronDown,
+  IconChevronUp,
+  IconSearch,
+  IconSelector,
+} from "@tabler/icons-react";
 
 import AddApplicationModal from "../components/applications/AddApplicationModal";
 import EditApplicationModal from "../components/applications/EditApplicationModal";
+
+import classes from "./Index.module.css";
 
 import localStorageAPI from "../api/applications";
 
@@ -92,7 +105,54 @@ function Home() {
 function ApplicationsTable({ applications, callback }) {
   const [opened, { open, close }] = useDisclosure(false);
 
+  const [search, setSearch] = useState("");
+  const [sortedApplications, setSortedApplications] = useState(applications);
+  const [sortBy, setSortBy] = useState(null);
+  const [reverseSortDirection, setReverseSortDirection] = useState(false);
+
   const [selectedApplication, setSelectedApplication] = useState({});
+
+  useEffect(() => {
+    setSortedApplications(applications);
+  }, [applications]);
+
+  const setSorting = (field) => {
+    const reversed = field === sortBy ? !reverseSortDirection : false;
+    setReverseSortDirection(reversed);
+    setSortBy(field);
+    setSortedApplications(
+      sortData(applications, { sortBy: field, reversed, search })
+    );
+  };
+
+  const handleSearchChange = (event) => {
+    const { value } = event.currentTarget;
+    setSearch(value);
+    setSortedApplications(
+      sortData(applications, {
+        sortBy,
+        reversed: reverseSortDirection,
+        search: value,
+      })
+    );
+  };
+
+  const sortedRows = sortedApplications.map((application, index) => (
+    <Table.Tr
+      key={index}
+      onClick={() => {
+        setSelectedApplication({ ...application });
+        open();
+      }}
+      style={{ cursor: "pointer" }}
+    >
+      <Table.Td>{application.jobTitle}</Table.Td>
+      <Table.Td>{application.company}</Table.Td>
+      <Table.Td>{application.status}</Table.Td>
+      <Table.Td>{application.applicationDate}</Table.Td>
+      <Table.Td>{application.interviewDate}</Table.Td>
+    </Table.Tr>
+  ));
 
   const rows = applications?.map((application, index) => (
     <Table.Tr
@@ -120,19 +180,105 @@ function ApplicationsTable({ applications, callback }) {
         application={selectedApplication}
         callback={callback}
       />
+      <TextInput
+        placeholder="Search by any field"
+        mb="md"
+        leftSection={<IconSearch size={16} stroke={1.5} />}
+        value={search}
+        onChange={handleSearchChange}
+      />
       <Table highlightOnHover>
         <Table.Thead>
           <Table.Tr>
-            <Table.Th>Job Title</Table.Th>
-            <Table.Th>Company</Table.Th>
-            <Table.Th>Status</Table.Th>
-            <Table.Th>Application Date</Table.Th>
-            <Table.Th>Interview Date</Table.Th>
+            <Th
+              sorted={sortBy === "jobTitle"}
+              reversed={reverseSortDirection}
+              onSort={() => setSorting("jobTitle")}
+            >
+              Job Title
+            </Th>
+            <Th
+              sorted={sortBy === "company"}
+              reversed={reverseSortDirection}
+              onSort={() => setSorting("company")}
+            >
+              Company
+            </Th>
+            <Th
+              sorted={sortBy === "status"}
+              reversed={reverseSortDirection}
+              onSort={() => setSorting("status")}
+            >
+              Status
+            </Th>
+            <Th
+              sorted={sortBy === "applicationDate"}
+              reversed={reverseSortDirection}
+              onSort={() => setSorting("applicationDate")}
+            >
+              Application Date
+            </Th>
+            <Th
+              sorted={sortBy === "interviewDate"}
+              reversed={reverseSortDirection}
+              onSort={() => setSorting("interviewDate")}
+            >
+              Interview Date
+            </Th>
           </Table.Tr>
         </Table.Thead>
-        <Table.Tbody>{rows}</Table.Tbody>
+        <Table.Tbody>{sortedRows}</Table.Tbody>
       </Table>
     </>
+  );
+}
+
+function Th({ children, reversed, sorted, onSort }) {
+  const Icon = sorted
+    ? reversed
+      ? IconChevronUp
+      : IconChevronDown
+    : IconSelector;
+  return (
+    <Table.Th className={classes.th}>
+      <UnstyledButton onClick={onSort} className={classes.control}>
+        <Group justify="space-between">
+          <Text fw={500} fz="sm">
+            {children}
+          </Text>
+          <Center className={classes.icon}>
+            <Icon size={16} stroke={1.5} />
+          </Center>
+        </Group>
+      </UnstyledButton>
+    </Table.Th>
+  );
+}
+
+function filterData(data, search) {
+  const query = search.toLowerCase().trim();
+  return data.filter((item) =>
+    keys(data[0]).some((key) => item[key]?.toLowerCase().includes(query))
+  );
+}
+
+function sortData(data, { sortBy, reversed, search }) {
+  if (!sortBy) {
+    return filterData(data, search);
+  }
+
+  return filterData(
+    [...data].sort((a, b) => {
+      if (!a[sortBy] && !b[sortBy]) return 0;
+      if (!a[sortBy]) return 1;
+      if (!b[sortBy]) return -1;
+      if (reversed) {
+        return b[sortBy].localeCompare(a[sortBy]);
+      }
+
+      return a[sortBy].localeCompare(b[sortBy]);
+    }),
+    search
   );
 }
 
