@@ -7,7 +7,7 @@ Try it here: [job-applications-tracker.pages.dev](https://job-applications-track
 ## ✨ Features
 
 - Add and manage job applications with job title, company, status, and job description
-- One click to edit and delete entries
+- Interactive Sankey chart to visualize your job application flow
 - 100% private — your data stays on your device
 
 ## 🛠️ Tech Stack
