@@ -126,7 +126,8 @@ const SankeyChart = ({
       .style("color", "white")
       .style("border-radius", "4px")
       .style("pointer-events", "none")
-      .style("display", "none");
+      .style("display", "none")
+      .style("min-width", "25%");
 
     svg
       .selectAll("path")
@@ -138,6 +139,7 @@ const SankeyChart = ({
           .style("display", "block")
           .style("top", event.pageY + 10 + "px")
           .style("left", event.pageX + 10 + "px")
+          .style("transform", "translate(0, 0)")
           .html(
             `<strong>${d.source.name} → ${
               d.target.name
@@ -155,7 +157,14 @@ const SankeyChart = ({
         tooltip
           .style("display", "block")
           .style("top", event.pageY + 10 + "px")
-          .style("left", event.pageX + 10 + "px")
+          .style(
+            "left",
+            event.pageX + (d.name === "No Response" ? 0 : 10) + "px"
+          )
+          .style(
+            "transform",
+            `translate(${d.name === "No Response" ? "-100%" : 0}, 0)`
+          )
           .html(
             `<strong>${d.name}</strong><br/>Companies: ${companies.join(", ")}`
           );
