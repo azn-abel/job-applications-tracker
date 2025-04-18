@@ -104,7 +104,14 @@ export default function EditApplicationModal({
         size="lg"
       >
         <LoadingOverlay visible={fetching} zIndex={1000} />
-        <form onSubmit={form.onSubmit(updateApplication)}>
+        <form
+          onSubmit={form.onSubmit(updateApplication)}
+          onKeyDown={(e) => {
+            if (e.code === "Enter" && e.target.tagName !== "TEXTAREA") {
+              e.preventDefault();
+            }
+          }}
+        >
           <TextInput
             label="Job Title"
             placeholder="Job Title"
@@ -133,8 +140,6 @@ export default function EditApplicationModal({
             label="Application Date"
             valueFormat="YYYY-MM-DD"
             placeholder="Choose Date"
-            allowDeselect
-            clearable
             preserveTime={false}
             firstDayOfWeek={0}
             weekendDays={[]}
@@ -146,7 +151,6 @@ export default function EditApplicationModal({
             label="Interview Date"
             valueFormat="YYYY-MM-DD"
             placeholder="Choose Date"
-            allowDeselect
             clearable
             preserveTime={false}
             firstDayOfWeek={0}
