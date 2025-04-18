@@ -7,7 +7,7 @@ import SankeyChart from "../components/SankeyChart/sankey";
 export default function Visualize() {
   const [loading, setLoading] = useState(true);
 
-  const [applications, setApplications] = useState(0);
+  const [applications, setApplications] = useState([]);
   const [interviews, setInterviews] = useState(0);
   const [offers, setOffers] = useState(0);
   const [noResponse, setNoResponse] = useState(0);
@@ -47,6 +47,8 @@ export default function Visualize() {
     setLoading(false);
   }, []);
 
+  console.log(loading, applications);
+
   if (loading)
     return (
       <Flex justify="center" align="start">
@@ -54,12 +56,13 @@ export default function Visualize() {
       </Flex>
     );
 
-  if (!loading && !applications)
+  if (!loading && applications.length === 0) {
     return (
       <Flex justify="center" align="start">
         <Title order={2}>Nothing to show.</Title>
       </Flex>
     );
+  }
 
   return (
     <Flex justify="center" align="start">
