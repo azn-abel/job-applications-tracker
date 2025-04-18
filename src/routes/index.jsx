@@ -27,6 +27,7 @@ import {
 import AddApplicationModal from "../components/applications/AddApplicationModal";
 import EditApplicationModal from "../components/applications/EditApplicationModal";
 import DeleteSelectedApplicationModal from "../components/applications/DeleteSelectedApplicationsModal";
+import ImportApplicationsModal from "../components/applications/ImportApplicationsModal";
 
 import classes from "./Index.module.css";
 
@@ -97,7 +98,10 @@ function Home() {
           </Flex>
           <Flex gap={12}>
             {selectedRows?.length === 0 && (
-              <AddApplicationModal callback={fillApplications} />
+              <>
+                <AddApplicationModal callback={fillApplications} />
+                <ImportApplicationsModal />
+              </>
             )}
             {selectedRows?.length > 0 && (
               <DeleteSelectedApplicationModal callback={fillApplications} />
