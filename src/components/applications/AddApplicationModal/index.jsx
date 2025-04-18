@@ -12,7 +12,7 @@ import {
 import { DateInput } from "@mantine/dates";
 import { isNotEmpty, useForm } from "@mantine/form";
 import localStorageAPI from "../../../api/applications";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import dayjs from "dayjs";
 
 export default function AddApplicationModal({ callback }) {
@@ -51,6 +51,17 @@ export default function AddApplicationModal({ callback }) {
     close();
     callback();
   };
+
+  useEffect(() => {
+    form.setValues({
+      jobTitle: "",
+      company: "",
+      status: "",
+      jobDescription: "",
+      applicationDate: null,
+      interviewDate: null,
+    });
+  }, [opened]);
 
   return (
     <>
