@@ -116,7 +116,7 @@ export default function AddApplicationModal({ callback }) {
             firstDayOfWeek={0}
             weekendDays={[]}
             withAsterisk
-            onFocus={(e) => e.target.blur()}
+            onTouchEnd={(e) => (e.target.readOnly = true)}
             key={form.key("applicationDate")}
             {...form.getInputProps("applicationDate", { type: "date" })}
           />
@@ -127,6 +127,7 @@ export default function AddApplicationModal({ callback }) {
             clearable
             firstDayOfWeek={0}
             weekendDays={[]}
+            onTouchEnd={(e) => (e.target.readOnly = true)}
             key={form.key("interviewDate")}
             {...form.getInputProps("interviewDate", { type: "date" })}
           />

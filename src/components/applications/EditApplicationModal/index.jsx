@@ -144,6 +144,7 @@ export default function EditApplicationModal({
             firstDayOfWeek={0}
             weekendDays={[]}
             withAsterisk
+            onTouchEnd={(e) => (e.target.readOnly = true)}
             key={form.key("applicationDate")}
             {...form.getInputProps("applicationDate", { type: "date" })}
           />
@@ -155,6 +156,7 @@ export default function EditApplicationModal({
             preserveTime={false}
             firstDayOfWeek={0}
             weekendDays={[]}
+            onTouchEnd={(e) => (e.target.readOnly = true)}
             key={form.key("interviewDate")}
             {...form.getInputProps("interviewDate", { type: "date" })}
           />
