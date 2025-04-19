@@ -116,6 +116,7 @@ export default function AddApplicationModal({ callback }) {
             firstDayOfWeek={0}
             weekendDays={[]}
             withAsterisk
+            onFocus={(e) => e.target.blur()}
             key={form.key("applicationDate")}
             {...form.getInputProps("applicationDate", { type: "date" })}
           />
