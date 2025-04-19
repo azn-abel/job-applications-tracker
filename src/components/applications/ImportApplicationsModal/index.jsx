@@ -26,7 +26,7 @@ export default function ImportApplicationsModal({ callback }) {
       onClose();
       callback();
     } catch (e) {
-      setError("Something went wrong.");
+      setError("Invalid CSV.");
       console.log(e);
     }
   };
