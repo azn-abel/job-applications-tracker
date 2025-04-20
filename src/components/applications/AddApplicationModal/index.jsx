@@ -73,6 +73,9 @@ export default function AddApplicationModal({ callback }) {
         opened={opened}
         onClose={close}
         title="Add Application"
+        removeScrollProps={{
+          allowPinchZoom: true,
+        }}
         centered
         size="lg"
       >

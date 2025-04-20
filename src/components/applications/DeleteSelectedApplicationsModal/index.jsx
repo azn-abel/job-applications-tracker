@@ -31,6 +31,9 @@ export default function DeleteSelectedApplicationModal({ callback }) {
         onClose={close}
         title="Delete Applications"
         centered
+        removeScrollProps={{
+          allowPinchZoom: true,
+        }}
         size="md"
       >
         <Text>

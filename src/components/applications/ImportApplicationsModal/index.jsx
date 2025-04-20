@@ -33,7 +33,15 @@ export default function ImportApplicationsModal({ callback }) {
 
   return (
     <>
-      <Modal opened={opened} centered onClose={onClose} title="Import CSV">
+      <Modal
+        opened={opened}
+        centered
+        onClose={onClose}
+        removeScrollProps={{
+          allowPinchZoom: true,
+        }}
+        title="Import CSV"
+      >
         <Group justify="center">
           <FileButton
             mt={4}

@@ -100,6 +100,9 @@ export default function EditApplicationModal({
         opened={opened}
         onClose={close}
         title="View and Edit Application"
+        removeScrollProps={{
+          allowPinchZoom: true,
+        }}
         centered
         size="lg"
       >
