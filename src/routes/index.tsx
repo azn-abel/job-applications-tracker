@@ -1,4 +1,4 @@
-import { useState, useEffect, ChangeEvent } from "react";
+import { useState, useEffect, ChangeEvent } from 'react'
 import {
   Container,
   Title,
@@ -15,57 +15,57 @@ import {
   Group,
   Table,
   Button,
-} from "@mantine/core";
-import cx from "clsx";
+} from '@mantine/core'
+import cx from 'clsx'
 import {
   IconChevronDown,
   IconChevronUp,
   IconSearch,
   IconSelector,
-} from "@tabler/icons-react";
+} from '@tabler/icons-react'
 
-import AddApplicationModal from "../components/applications/AddApplicationModal";
-import EditApplicationModal from "../components/applications/EditApplicationModal";
-import DeleteSelectedApplicationModal from "../components/applications/DeleteSelectedApplicationsModal";
-import ImportApplicationsModal from "../components/applications/ImportApplicationsModal";
+import AddApplicationModal from '../components/applications/AddApplicationModal'
+import EditApplicationModal from '../components/applications/EditApplicationModal'
+import DeleteSelectedApplicationModal from '../components/applications/DeleteSelectedApplicationsModal'
+import ImportApplicationsModal from '../components/applications/ImportApplicationsModal'
 
-import classes from "./Index.module.css";
+import classes from './Index.module.css'
 
-import localStorageAPI from "../api/applications";
+import localStorageAPI from '../api/applications'
 
-import { useDisclosure, useMediaQuery } from "@mantine/hooks";
+import { useDisclosure, useMediaQuery } from '@mantine/hooks'
 
-import { useAtom } from "jotai";
-import { rowsAtom, selectedRowsAtom } from "../state";
-import { downloadCSV } from "../api/io";
-import { conditionalS } from "../utils";
+import { useAtom } from 'jotai'
+import { rowsAtom, selectedRowsAtom } from '../state'
+import { downloadCSV } from '../api/io'
+import { conditionalS } from '../utils'
 
-import { Application, ApplicationDTO } from "../types/applications";
+import { Application, ApplicationDTO } from '../types/applications'
 
-import { ReactNode } from "react";
+import { ReactNode } from 'react'
 
 function Home() {
-  const [applications, setApplications] = useAtom(rowsAtom);
-  const [selectedRows] = useAtom(selectedRowsAtom);
+  const [applications, setApplications] = useAtom(rowsAtom)
+  const [selectedRows] = useAtom(selectedRowsAtom)
   const numInterviews = applications.filter((app) =>
-    ["Interview", "Offer"].includes(app.status)
-  ).length;
-  const numOffers = applications.filter((app) => app.status === "Offer").length;
+    ['Interview', 'Offer'].includes(app.status)
+  ).length
+  const numOffers = applications.filter((app) => app.status === 'Offer').length
 
-  const smallScreen = useMediaQuery("(max-width: 512px)");
+  const smallScreen = useMediaQuery('(max-width: 512px)')
 
   const fillApplications = async () => {
-    const response = localStorageAPI.fetchApplications();
+    const response = localStorageAPI.fetchApplications()
     if (!response) {
       // something went wrong
-      return;
+      return
     }
-    setApplications(response);
-  };
+    setApplications(response)
+  }
 
   useEffect(() => {
-    fillApplications();
-  }, []);
+    fillApplications()
+  }, [])
 
   return (
     <>
@@ -76,7 +76,7 @@ function Home() {
           <Grid.Col span={4}>
             <Card shadow="md" radius={8}>
               <Title order={2}>{applications?.length || 0}</Title>
-              <Text size={smallScreen ? "xs" : "md"}>
+              <Text size={smallScreen ? 'xs' : 'md'}>
                 Application{conditionalS(applications?.length)}
               </Text>
             </Card>
@@ -86,11 +86,11 @@ function Home() {
               <Title order={2}>
                 {applications?.filter(
                   (ele) =>
-                    ["Interview", "Offer"].includes(ele.status) ||
+                    ['Interview', 'Offer'].includes(ele.status) ||
                     ele.interviewDate
                 ).length || 0}
               </Title>
-              <Text size={smallScreen ? "xs" : "md"}>
+              <Text size={smallScreen ? 'xs' : 'md'}>
                 Interview{conditionalS(numInterviews)}
               </Text>
             </Card>
@@ -98,10 +98,10 @@ function Home() {
           <Grid.Col span={4}>
             <Card shadow="md" radius={8}>
               <Title order={2}>
-                {applications?.filter((ele) => ele.status === "Offer").length ||
+                {applications?.filter((ele) => ele.status === 'Offer').length ||
                   0}
               </Title>
-              <Text size={smallScreen ? "xs" : "md"}>
+              <Text size={smallScreen ? 'xs' : 'md'}>
                 Offer{conditionalS(numOffers)}
               </Text>
             </Card>
@@ -126,8 +126,8 @@ function Home() {
                 onClick={() =>
                   downloadCSV(
                     applications.filter((row) => {
-                      if (!row.id) return false;
-                      return selectedRows.includes(row.id);
+                      if (!row.id) return false
+                      return selectedRows.includes(row.id)
                     })
                   )
                 }
@@ -142,7 +142,7 @@ function Home() {
           mb={24}
           radius={8}
           shadow="md"
-          style={{ overflowX: "scroll" }}
+          style={{ overflowX: 'scroll' }}
           className="hide-scroll"
         >
           <ApplicationsTable
@@ -152,84 +152,84 @@ function Home() {
         </Card>
       </Container>
     </>
-  );
+  )
 }
 
 function ApplicationsTable({
   applications,
   callback,
 }: {
-  applications: Application[];
-  callback: () => void;
+  applications: Application[]
+  callback: () => void
 }) {
-  const [opened, { open, close }] = useDisclosure(false);
+  const [opened, { open, close }] = useDisclosure(false)
 
-  const [search, setSearch] = useState("");
-  const [sortedApplications, setSortedApplications] = useState(applications);
-  const [sortBy, setSortBy] = useState<keyof ApplicationDTO | null>(null);
-  const [reverseSortDirection, setReverseSortDirection] = useState(false);
+  const [search, setSearch] = useState('')
+  const [sortedApplications, setSortedApplications] = useState(applications)
+  const [sortBy, setSortBy] = useState<keyof ApplicationDTO | null>(null)
+  const [reverseSortDirection, setReverseSortDirection] = useState(false)
 
   const [selectedApplication, setSelectedApplication] =
-    useState<Application | null>(null);
+    useState<Application | null>(null)
 
-  const [selection, setSelection] = useAtom(selectedRowsAtom);
+  const [selection, setSelection] = useAtom(selectedRowsAtom)
 
   const toggleRow = (id: string) =>
     setSelection((current) =>
       current.includes(id)
         ? current.filter((item) => item !== id)
         : [...current, id]
-    );
+    )
   const toggleAll = () =>
     setSelection((current) =>
       current.length === applications.length
         ? []
         : applications.map((item) => item.id as string)
-    );
+    )
 
   useEffect(() => {
-    setSortedApplications(applications);
-  }, [applications]);
+    setSortedApplications(applications)
+  }, [applications])
 
   const setSorting = (field: keyof Application) => {
-    const reversed = field === sortBy ? !reverseSortDirection : false;
-    setReverseSortDirection(reversed);
-    setSortBy(field);
+    const reversed = field === sortBy ? !reverseSortDirection : false
+    setReverseSortDirection(reversed)
+    setSortBy(field)
     setSortedApplications(
       sortData(applications, { sortBy: field, reversed, search })
-    );
-  };
+    )
+  }
 
   const handleSearchChange = (event: ChangeEvent<HTMLInputElement>) => {
-    const { value } = event.currentTarget;
-    setSearch(value);
+    const { value } = event.currentTarget
+    setSearch(value)
     setSortedApplications(
       sortData(applications, {
         sortBy,
         reversed: reverseSortDirection,
         search: value,
       })
-    );
-  };
+    )
+  }
 
   const sortedRows = sortedApplications.map((application, index) => {
-    const selected = selection.includes(application.id as string);
+    const selected = selection.includes(application.id as string)
     return (
       <Table.Tr
         key={index}
         onClick={() => {
-          setSelectedApplication({ ...application });
-          open();
+          setSelectedApplication({ ...application })
+          open()
         }}
-        style={{ cursor: "pointer" }}
+        style={{ cursor: 'pointer' }}
         className={cx({ [classes.rowSelected]: selected })}
       >
         <Table.Td>
           <Checkbox
             checked={selection.includes(application.id)}
             onChange={() => {
-              toggleRow(application.id);
-              close();
+              toggleRow(application.id)
+              close()
             }}
           />
         </Table.Td>
@@ -239,8 +239,8 @@ function ApplicationsTable({
         <Table.Td>{application.applicationDate}</Table.Td>
         <Table.Td>{application.interviewDate}</Table.Td>
       </Table.Tr>
-    );
-  });
+    )
+  })
 
   return (
     <>
@@ -272,37 +272,37 @@ function ApplicationsTable({
               />
             </Table.Th>
             <Th
-              sorted={sortBy === "jobTitle"}
+              sorted={sortBy === 'jobTitle'}
               reversed={reverseSortDirection}
-              onSort={() => setSorting("jobTitle")}
+              onSort={() => setSorting('jobTitle')}
             >
               Job Title
             </Th>
             <Th
-              sorted={sortBy === "company"}
+              sorted={sortBy === 'company'}
               reversed={reverseSortDirection}
-              onSort={() => setSorting("company")}
+              onSort={() => setSorting('company')}
             >
               Company
             </Th>
             <Th
-              sorted={sortBy === "status"}
+              sorted={sortBy === 'status'}
               reversed={reverseSortDirection}
-              onSort={() => setSorting("status")}
+              onSort={() => setSorting('status')}
             >
               Status
             </Th>
             <Th
-              sorted={sortBy === "applicationDate"}
+              sorted={sortBy === 'applicationDate'}
               reversed={reverseSortDirection}
-              onSort={() => setSorting("applicationDate")}
+              onSort={() => setSorting('applicationDate')}
             >
               Application Date
             </Th>
             <Th
-              sorted={sortBy === "interviewDate"}
+              sorted={sortBy === 'interviewDate'}
               reversed={reverseSortDirection}
-              onSort={() => setSorting("interviewDate")}
+              onSort={() => setSorting('interviewDate')}
             >
               Interview Date
             </Th>
@@ -311,7 +311,7 @@ function ApplicationsTable({
         <Table.Tbody>{sortedRows}</Table.Tbody>
       </Table>
     </>
-  );
+  )
 }
 
 function Th({
@@ -320,16 +320,16 @@ function Th({
   sorted,
   onSort,
 }: {
-  children: ReactNode;
-  reversed: boolean;
-  sorted: boolean;
-  onSort: () => void;
+  children: ReactNode
+  reversed: boolean
+  sorted: boolean
+  onSort: () => void
 }) {
   const Icon = sorted
     ? reversed
       ? IconChevronUp
       : IconChevronDown
-    : IconSelector;
+    : IconSelector
   return (
     <Table.Th className={classes.th}>
       <UnstyledButton onClick={onSort} className={classes.control}>
@@ -343,14 +343,14 @@ function Th({
         </Group>
       </UnstyledButton>
     </Table.Th>
-  );
+  )
 }
 
 function filterData(data: Application[], search: string) {
-  const query = search.toLowerCase().trim();
+  const query = search.toLowerCase().trim()
   return data.filter((item) =>
     keys(data[0]).some((key) => item[key]?.toLowerCase().includes(query))
-  );
+  )
 }
 
 function sortData(
@@ -362,22 +362,22 @@ function sortData(
   }: { sortBy: keyof ApplicationDTO | null; reversed: Boolean; search: string }
 ) {
   if (!sortBy) {
-    return filterData(data, search);
+    return filterData(data, search)
   }
 
   return filterData(
     [...data].sort((a, b) => {
-      if (!a[sortBy] && !b[sortBy]) return 0;
-      if (!a[sortBy]) return 1;
-      if (!b[sortBy]) return -1;
+      if (!a[sortBy] && !b[sortBy]) return 0
+      if (!a[sortBy]) return 1
+      if (!b[sortBy]) return -1
       if (reversed) {
-        return b[sortBy].localeCompare(a[sortBy]);
+        return b[sortBy].localeCompare(a[sortBy])
       }
 
-      return a[sortBy].localeCompare(b[sortBy]);
+      return a[sortBy].localeCompare(b[sortBy])
     }),
     search
-  );
+  )
 }
 
-export default Home;
+export default Home

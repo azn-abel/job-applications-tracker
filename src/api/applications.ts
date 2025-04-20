@@ -1,39 +1,39 @@
-import { Application, ApplicationDTO, DateString } from "../types/applications";
+import { Application, ApplicationDTO, DateString } from '../types/applications'
 
 const localStorageAPI = {
-  key: "applications",
+  key: 'applications',
 
   fetchApplications(): Application[] {
-    const raw = localStorage.getItem(this.key);
-    return raw ? JSON.parse(raw) : [];
+    const raw = localStorage.getItem(this.key)
+    return raw ? JSON.parse(raw) : []
   },
 
   postApplication(application: ApplicationDTO) {
-    const newApp: Application | null = validateApplication(application);
-    if (!newApp) return;
+    const newApp: Application | null = validateApplication(application)
+    if (!newApp) return
 
-    const applications = this.fetchApplications();
-    applications.push(newApp);
-    localStorage.setItem(this.key, JSON.stringify(applications));
-    return newApp;
+    const applications = this.fetchApplications()
+    applications.push(newApp)
+    localStorage.setItem(this.key, JSON.stringify(applications))
+    return newApp
   },
 
   putApplication(id: string, application: ApplicationDTO) {
-    const newApp = validateApplication({ id, ...application });
-    if (!newApp) return;
+    const newApp = validateApplication({ id, ...application })
+    if (!newApp) return
 
-    const applications = this.fetchApplications();
-    const updated = applications.map((app) => (app.id === id ? newApp : app));
-    localStorage.setItem(this.key, JSON.stringify(updated));
-    return updated.find((app) => app.id === id);
+    const applications = this.fetchApplications()
+    const updated = applications.map((app) => (app.id === id ? newApp : app))
+    localStorage.setItem(this.key, JSON.stringify(updated))
+    return updated.find((app) => app.id === id)
   },
 
   deleteApplication(id: string) {
-    const applications = this.fetchApplications();
-    const filtered = applications.filter((app) => app.id !== id);
-    localStorage.setItem(this.key, JSON.stringify(filtered));
+    const applications = this.fetchApplications()
+    const filtered = applications.filter((app) => app.id !== id)
+    localStorage.setItem(this.key, JSON.stringify(filtered))
   },
-};
+}
 
 function validateApplication(application: ApplicationDTO): Application | null {
   if (
@@ -43,9 +43,9 @@ function validateApplication(application: ApplicationDTO): Application | null {
     !application.status ||
     !application.applicationDate
   )
-    return null;
+    return null
 
-  const { jobTitle, company, status, applicationDate } = application;
+  const { jobTitle, company, status, applicationDate } = application
 
   const newApp = {
     id: application.id || crypto.randomUUID(),
@@ -53,14 +53,14 @@ function validateApplication(application: ApplicationDTO): Application | null {
     company,
     status,
     applicationDate,
-    interviewDate: application.interviewDate || ("" as DateString),
+    interviewDate: application.interviewDate || ('' as DateString),
     jobDescription:
-      application.jobDescription && application.jobDescription !== "null"
+      application.jobDescription && application.jobDescription !== 'null'
         ? application.jobDescription
-        : "",
-  };
+        : '',
+  }
 
-  return newApp;
+  return newApp
 }
 
-export default localStorageAPI;
+export default localStorageAPI

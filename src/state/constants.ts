@@ -1,7 +1,7 @@
 export const validApplicationStates = [
-  "New",
-  "Assessment",
-  "Interview",
-  "Offer",
-  "Rejected",
-];
+  'New',
+  'Assessment',
+  'Interview',
+  'Offer',
+  'Rejected',
+]

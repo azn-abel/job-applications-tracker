@@ -1,39 +1,39 @@
-import { useDisclosure } from "@mantine/hooks";
-import { useState } from "react";
-import { Modal, Button } from "@mantine/core";
-import { FileButton, Group, Text, Flex } from "@mantine/core";
-import { importCSV } from "../../../api/io";
-import localStorageAPI from "../../../api/applications";
+import { useDisclosure } from '@mantine/hooks'
+import { useState } from 'react'
+import { Modal, Button } from '@mantine/core'
+import { FileButton, Group, Text, Flex } from '@mantine/core'
+import { importCSV } from '../../../api/io'
+import localStorageAPI from '../../../api/applications'
 
 export default function ImportApplicationsModal({
   callback,
 }: {
-  callback: () => void;
+  callback: () => void
 }) {
-  const [opened, { open, close }] = useDisclosure(false);
-  const [file, setFile] = useState<File | null>(null);
-  const [error, setError] = useState("");
+  const [opened, { open, close }] = useDisclosure(false)
+  const [file, setFile] = useState<File | null>(null)
+  const [error, setError] = useState('')
 
   const onClose = () => {
-    close();
-    setFile(null);
-  };
+    close()
+    setFile(null)
+  }
 
   const handleImport = async () => {
-    setError("");
-    if (!file) return;
+    setError('')
+    if (!file) return
     try {
-      const results = await importCSV(file);
+      const results = await importCSV(file)
       for (let result of results) {
-        localStorageAPI.postApplication(result);
+        localStorageAPI.postApplication(result)
       }
-      onClose();
-      callback();
+      onClose()
+      callback()
     } catch (e) {
-      setError("Invalid CSV.");
-      console.log(e);
+      setError('Invalid CSV.')
+      console.log(e)
     }
-  };
+  }
 
   return (
     <>
@@ -53,7 +53,7 @@ export default function ImportApplicationsModal({
         </Group>
 
         <Text size="sm" ta="center" mt="sm">
-          {file ? `Selected file: ${file?.name}` : "No file selected."}
+          {file ? `Selected file: ${file?.name}` : 'No file selected.'}
         </Text>
 
         {error && (
@@ -72,5 +72,5 @@ export default function ImportApplicationsModal({
         Import
       </Button>
     </>
-  );
+  )
 }
