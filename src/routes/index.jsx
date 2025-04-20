@@ -36,12 +36,17 @@ import localStorageAPI from "../api/applications";
 import { useDisclosure, useMediaQuery } from "@mantine/hooks";
 
 import { useAtom } from "jotai";
-import { selectedRowsAtom } from "../atoms";
+import { rowsAtom, selectedRowsAtom } from "../state";
 import { downloadCSV } from "../api/io";
+import { conditionalS } from "../utils";
 
 function Home() {
-  const [applications, setApplications] = useState([]);
+  const [applications, setApplications] = useAtom(rowsAtom);
   const [selectedRows] = useAtom(selectedRowsAtom);
+  const numInterviews = applications.filter((app) =>
+    ["Interview", "Offer"].includes(app.status)
+  ).length;
+  const numOffers = applications.filter((app) => app.status === "Offer").length;
 
   const smallScreen = useMediaQuery("(max-width: 512px)");
 
@@ -67,7 +72,9 @@ function Home() {
           <Grid.Col span={4}>
             <Card shadow="md" radius={8}>
               <Title order={2}>{applications?.length || 0}</Title>
-              <Text size={smallScreen ? "xs" : "md"}>Applications</Text>
+              <Text size={smallScreen ? "xs" : "md"}>
+                Application{conditionalS(applications?.length)}
+              </Text>
             </Card>
           </Grid.Col>
           <Grid.Col span={4}>
@@ -79,7 +86,9 @@ function Home() {
                     ele.interviewDate
                 ).length || 0}
               </Title>
-              <Text size={smallScreen ? "xs" : "md"}>Interviews</Text>
+              <Text size={smallScreen ? "xs" : "md"}>
+                Interview{conditionalS(numInterviews)}
+              </Text>
             </Card>
           </Grid.Col>
           <Grid.Col span={4}>
@@ -88,7 +97,9 @@ function Home() {
                 {applications?.filter((ele) => ele.status === "Offer").length ||
                   0}
               </Title>
-              <Text size={smallScreen ? "xs" : "md"}>Offers</Text>
+              <Text size={smallScreen ? "xs" : "md"}>
+                Offer{conditionalS(numOffers)}
+              </Text>
             </Card>
           </Grid.Col>
         </Grid>

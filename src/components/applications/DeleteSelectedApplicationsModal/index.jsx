@@ -7,7 +7,7 @@ import { useEffect, useState } from "react";
 import dayjs from "dayjs";
 
 import { useAtom } from "jotai";
-import { selectedRowsAtom } from "../../../atoms";
+import { selectedRowsAtom } from "../../../state";
 
 export default function DeleteSelectedApplicationModal({ callback }) {
   const [opened, { open, close }] = useDisclosure(false);

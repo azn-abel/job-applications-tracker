@@ -15,9 +15,19 @@ import localStorageAPI from "../../../api/applications";
 import { useEffect, useState } from "react";
 import dayjs from "dayjs";
 
+import { uniqueJobTitlesAtom, uniqueCompaniesAtom } from "../../../state";
+import { useAtom } from "jotai";
+
+import { validApplicationStates } from "../../../state/constants";
+
+import { handleStatusDropdownClose } from "../util";
+
 export default function AddApplicationModal({ callback }) {
   const [opened, { open, close }] = useDisclosure(false);
   const [fetching, setFetching] = useState(false);
+
+  const [uniqueJobTitles] = useAtom(uniqueJobTitlesAtom);
+  const [uniqueCompanies] = useAtom(uniqueCompaniesAtom);
 
   const form = useForm({
     mode: "uncontrolled",
@@ -32,7 +42,9 @@ export default function AddApplicationModal({ callback }) {
     validate: {
       jobTitle: isNotEmpty("Required"),
       company: isNotEmpty("Required"),
-      status: isNotEmpty("Required"),
+      status: (value) =>
+        validApplicationStates.includes(value) ||
+        "Status must be one of: New, Assessment, Interview, Offer, Rejected",
       applicationDate: isNotEmpty("Required"),
     },
   });
@@ -88,9 +100,10 @@ export default function AddApplicationModal({ callback }) {
             }
           }}
         >
-          <TextInput
+          <Autocomplete
             label="Job Title"
             placeholder="Job Title"
+            data={uniqueJobTitles}
             withAsterisk
             key={form.key("jobTitle")}
             {...form.getInputProps("jobTitle")}
@@ -98,15 +111,16 @@ export default function AddApplicationModal({ callback }) {
           <Autocomplete
             label="Company"
             placeholder="Company Name"
-            data={[]}
+            data={uniqueCompanies}
             withAsterisk
             key={form.key("company")}
             {...form.getInputProps("company")}
           />
-          <Select
+          <Autocomplete
             label="Status"
             placeholder="Status"
-            data={["New", "Assessment", "Interview", "Offer", "Rejected"]}
+            data={validApplicationStates}
+            onDropdownClose={() => handleStatusDropdownClose(form)}
             withAsterisk
             key={form.key("status")}
             {...form.getInputProps("status")}

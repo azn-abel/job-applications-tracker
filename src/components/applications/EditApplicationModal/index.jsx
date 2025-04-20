@@ -16,6 +16,12 @@ import timezone from "dayjs/plugin/timezone";
 
 import localStorageAPI from "../../../api/applications";
 
+import { uniqueJobTitlesAtom, uniqueCompaniesAtom } from "../../../state";
+import { useAtom } from "jotai";
+
+import { validApplicationStates } from "../../../state/constants";
+import { handleStatusDropdownClose } from "../util";
+
 import { useState, useEffect } from "react";
 
 dayjs.extend(utc);
@@ -28,6 +34,9 @@ export default function EditApplicationModal({
   application,
   callback,
 }) {
+  const [uniqueJobTitles] = useAtom(uniqueJobTitlesAtom);
+  const [uniqueCompanies] = useAtom(uniqueCompaniesAtom);
+
   const form = useForm({
     mode: "uncontrolled",
     initialValues: {
@@ -41,7 +50,9 @@ export default function EditApplicationModal({
     validate: {
       jobTitle: isNotEmpty("Required"),
       company: isNotEmpty("Required"),
-      status: isNotEmpty("Required"),
+      status: (value) =>
+        validApplicationStates.includes(value) ||
+        "Status must be one of: New, Assessment, Interview, Offer, Rejected",
       applicationDate: isNotEmpty("Required"),
     },
   });
@@ -115,17 +126,18 @@ export default function EditApplicationModal({
             }
           }}
         >
-          <TextInput
+          <Autocomplete
             label="Job Title"
             placeholder="Job Title"
             withAsterisk
+            data={uniqueJobTitles}
             key={form.key("jobTitle")}
             {...form.getInputProps("jobTitle")}
           />
           <Autocomplete
             label="Company"
             placeholder="Company Name"
-            data={[]}
+            data={uniqueCompanies}
             withAsterisk
             key={form.key("company")}
             {...form.getInputProps("company")}
@@ -135,6 +147,7 @@ export default function EditApplicationModal({
             placeholder="Status"
             defaultValue={application?.status}
             data={["New", "Assessment", "Interview", "Offer", "Rejected"]}
+            onDropdownClose={() => handleStatusDropdownClose(form)}
             withAsterisk
             key={form.key("status")}
             {...form.getInputProps("status")}
