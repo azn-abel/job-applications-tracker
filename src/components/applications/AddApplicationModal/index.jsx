@@ -146,7 +146,7 @@ export default function AddApplicationModal({ callback }) {
             <Button mr={16} color="red" onClick={close}>
               Cancel
             </Button>
-            <Button type="submit">Submit</Button>
+            <Button type="submit">Save</Button>
           </Flex>
         </form>
       </Modal>

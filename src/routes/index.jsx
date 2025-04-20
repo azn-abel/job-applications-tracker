@@ -41,7 +41,7 @@ import { downloadCSV } from "../api/io";
 
 function Home() {
   const [applications, setApplications] = useState([]);
-  const [selectedRows, setSelectedRows] = useAtom(selectedRowsAtom);
+  const [selectedRows] = useAtom(selectedRowsAtom);
 
   const smallScreen = useMediaQuery("(max-width: 512px)");
 
