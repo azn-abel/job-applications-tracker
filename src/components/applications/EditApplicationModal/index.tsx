@@ -62,8 +62,9 @@ export default function EditApplicationModal({
       jobTitle: isNotEmpty('Required'),
       company: isNotEmpty('Required'),
       status: (value) =>
-        validApplicationStates.includes(value) ||
-        'Status must be one of: New, Assessment, Interview, Offer, Rejected',
+        !validApplicationStates.includes(value)
+          ? 'Status must be one of: New, Assessment, Interview, Offer, Rejected'
+          : null,
       applicationDate: isNotEmpty('Required'),
     },
   })

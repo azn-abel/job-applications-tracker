@@ -47,9 +47,11 @@ export default function AddApplicationModal({
     validate: {
       jobTitle: isNotEmpty('Required'),
       company: isNotEmpty('Required'),
-      status: (value) =>
-        validApplicationStates.includes(value) ||
-        'Status must be one of: New, Assessment, Interview, Offer, Rejected',
+      status: (value) => {
+        return !validApplicationStates.includes(value)
+          ? 'Status must be one of: New, Assessment, Interview, Offer, Rejected'
+          : null
+      },
       applicationDate: isNotEmpty('Required'),
     },
   })
