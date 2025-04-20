@@ -21,22 +21,27 @@ import { useAtom } from "jotai";
 import { validApplicationStates } from "../../../state/constants";
 
 import { handleStatusDropdownClose } from "../util";
+import { ApplicationDTO, DateString } from "../../../types/applications";
 
-export default function AddApplicationModal({ callback }) {
+export default function AddApplicationModal({
+  callback,
+}: {
+  callback: () => void;
+}) {
   const [opened, { open, close }] = useDisclosure(false);
   const [fetching, setFetching] = useState(false);
 
   const [uniqueJobTitles] = useAtom(uniqueJobTitlesAtom);
   const [uniqueCompanies] = useAtom(uniqueCompaniesAtom);
 
-  const form = useForm({
+  const form = useForm<ApplicationDTO>({
     mode: "uncontrolled",
     initialValues: {
       jobTitle: "",
       company: "",
-      status: "",
-      applicationDate: null,
-      interviewDate: null,
+      status: "New",
+      applicationDate: "",
+      interviewDate: "",
       jobDescription: "",
     },
     validate: {
@@ -49,10 +54,10 @@ export default function AddApplicationModal({ callback }) {
     },
   });
 
-  const createApplication = async (values) => {
-    const body = { ...values };
-    body.applicationDate = formatDate(body.applicationDate);
-    body.interviewDate = formatDate(body.interviewDate);
+  const createApplication = async (values: ApplicationDTO) => {
+    const body: ApplicationDTO = { ...values };
+    body.applicationDate = formatDate(body.applicationDate) || "";
+    body.interviewDate = formatDate(body.interviewDate) || "";
 
     if (body.interviewDate && ["New", "Assessment"].includes(body.status))
       body.status = "Interview";
@@ -72,10 +77,10 @@ export default function AddApplicationModal({ callback }) {
     form.setValues({
       jobTitle: "",
       company: "",
-      status: "",
+      status: "New",
       jobDescription: "",
-      applicationDate: null,
-      interviewDate: null,
+      applicationDate: "",
+      interviewDate: "",
     });
   }, [opened]);
 
@@ -94,8 +99,11 @@ export default function AddApplicationModal({ callback }) {
         <LoadingOverlay visible={fetching} zIndex={1000} />
         <form
           onSubmit={form.onSubmit(createApplication)}
-          onKeyDown={(e) => {
-            if (e.code === "Enter" && e.target.tagName !== "TEXTAREA") {
+          onKeyDown={(e: React.KeyboardEvent<HTMLFormElement>) => {
+            if (
+              e.code === "Enter" &&
+              (e.target as HTMLElement).tagName !== "TEXTAREA"
+            ) {
               e.preventDefault();
             }
           }}
@@ -133,9 +141,11 @@ export default function AddApplicationModal({ callback }) {
             firstDayOfWeek={0}
             weekendDays={[]}
             withAsterisk
-            onTouchEnd={(e) => (e.target.readOnly = true)}
+            onTouchEnd={(e: React.TouchEvent) =>
+              ((e.target as HTMLInputElement).readOnly = true)
+            }
             key={form.key("applicationDate")}
-            {...form.getInputProps("applicationDate", { type: "date" })}
+            {...form.getInputProps("applicationDate")}
           />
           <DateInput
             label="Interview Date"
@@ -144,9 +154,11 @@ export default function AddApplicationModal({ callback }) {
             clearable
             firstDayOfWeek={0}
             weekendDays={[]}
-            onTouchEnd={(e) => (e.target.readOnly = true)}
+            onTouchEnd={(e: React.TouchEvent) =>
+              ((e.target as HTMLInputElement).readOnly = true)
+            }
             key={form.key("interviewDate")}
-            {...form.getInputProps("interviewDate", { type: "date" })}
+            {...form.getInputProps("interviewDate")}
           />
           <Textarea
             label="Job Description"
@@ -172,7 +184,7 @@ export default function AddApplicationModal({ callback }) {
   );
 }
 
-function formatDate(date) {
+function formatDate(date?: Date | string): DateString | null {
   if (!date) return null;
-  return dayjs(date).format("YYYY-MM-DD");
+  return dayjs(date).format("YYYY-MM-DD") as DateString;
 }

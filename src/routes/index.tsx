@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, ChangeEvent } from "react";
 import {
   Container,
   Title,
@@ -39,6 +39,10 @@ import { useAtom } from "jotai";
 import { rowsAtom, selectedRowsAtom } from "../state";
 import { downloadCSV } from "../api/io";
 import { conditionalS } from "../utils";
+
+import { Application, ApplicationDTO } from "../types/applications";
+
+import { ReactNode } from "react";
 
 function Home() {
   const [applications, setApplications] = useAtom(rowsAtom);
@@ -121,7 +125,10 @@ function Home() {
               <Button
                 onClick={() =>
                   downloadCSV(
-                    applications.filter((row) => selectedRows.includes(row.id))
+                    applications.filter((row) => {
+                      if (!row.id) return false;
+                      return selectedRows.includes(row.id);
+                    })
                   )
                 }
               >
@@ -148,19 +155,25 @@ function Home() {
   );
 }
 
-function ApplicationsTable({ applications, callback }) {
+function ApplicationsTable({
+  applications,
+  callback,
+}: {
+  applications: Application[];
+  callback: () => void;
+}) {
   const [opened, { open, close }] = useDisclosure(false);
 
   const [search, setSearch] = useState("");
   const [sortedApplications, setSortedApplications] = useState(applications);
-  const [sortBy, setSortBy] = useState(null);
+  const [sortBy, setSortBy] = useState<keyof ApplicationDTO | null>(null);
   const [reverseSortDirection, setReverseSortDirection] = useState(false);
 
   const [selectedApplication, setSelectedApplication] = useState({});
 
   const [selection, setSelection] = useAtom(selectedRowsAtom);
 
-  const toggleRow = (id) =>
+  const toggleRow = (id: string) =>
     setSelection((current) =>
       current.includes(id)
         ? current.filter((item) => item !== id)
@@ -168,16 +181,16 @@ function ApplicationsTable({ applications, callback }) {
     );
   const toggleAll = () =>
     setSelection((current) =>
-      current.length === applications?.length
+      current.length === applications.length
         ? []
-        : applications?.map((item) => item.id)
+        : applications.map((item) => item.id as string)
     );
 
   useEffect(() => {
     setSortedApplications(applications);
   }, [applications]);
 
-  const setSorting = (field) => {
+  const setSorting = (field: keyof Application) => {
     const reversed = field === sortBy ? !reverseSortDirection : false;
     setReverseSortDirection(reversed);
     setSortBy(field);
@@ -186,7 +199,7 @@ function ApplicationsTable({ applications, callback }) {
     );
   };
 
-  const handleSearchChange = (event) => {
+  const handleSearchChange = (event: ChangeEvent<HTMLInputElement>) => {
     const { value } = event.currentTarget;
     setSearch(value);
     setSortedApplications(
@@ -199,7 +212,7 @@ function ApplicationsTable({ applications, callback }) {
   };
 
   const sortedRows = sortedApplications.map((application, index) => {
-    const selected = selection.includes(application.id);
+    const selected = selection.includes(application.id as string);
     return (
       <Table.Tr
         key={index}
@@ -300,7 +313,17 @@ function ApplicationsTable({ applications, callback }) {
   );
 }
 
-function Th({ children, reversed, sorted, onSort }) {
+function Th({
+  children,
+  reversed,
+  sorted,
+  onSort,
+}: {
+  children: ReactNode;
+  reversed: boolean;
+  sorted: boolean;
+  onSort: () => void;
+}) {
   const Icon = sorted
     ? reversed
       ? IconChevronUp
@@ -322,14 +345,21 @@ function Th({ children, reversed, sorted, onSort }) {
   );
 }
 
-function filterData(data, search) {
+function filterData(data: Application[], search: string) {
   const query = search.toLowerCase().trim();
   return data.filter((item) =>
     keys(data[0]).some((key) => item[key]?.toLowerCase().includes(query))
   );
 }
 
-function sortData(data, { sortBy, reversed, search }) {
+function sortData(
+  data: Application[],
+  {
+    sortBy,
+    reversed,
+    search,
+  }: { sortBy: keyof ApplicationDTO | null; reversed: Boolean; search: string }
+) {
   if (!sortBy) {
     return filterData(data, search);
   }

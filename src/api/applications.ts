@@ -1,13 +1,15 @@
+import { Application, ApplicationDTO, DateString } from "../types/applications";
+
 const localStorageAPI = {
   key: "applications",
 
-  fetchApplications() {
+  fetchApplications(): Application[] {
     const raw = localStorage.getItem(this.key);
     return raw ? JSON.parse(raw) : [];
   },
 
-  postApplication(application) {
-    const newApp = validateApplication(application);
+  postApplication(application: ApplicationDTO) {
+    const newApp: Application | null = validateApplication(application);
     if (!newApp) return;
 
     const applications = this.fetchApplications();
@@ -16,7 +18,7 @@ const localStorageAPI = {
     return newApp;
   },
 
-  putApplication(id, application) {
+  putApplication(id: string, application: ApplicationDTO) {
     const newApp = validateApplication({ id, ...application });
     if (!newApp) return;
 
@@ -26,14 +28,14 @@ const localStorageAPI = {
     return updated.find((app) => app.id === id);
   },
 
-  deleteApplication(id) {
+  deleteApplication(id: string) {
     const applications = this.fetchApplications();
     const filtered = applications.filter((app) => app.id !== id);
     localStorage.setItem(this.key, JSON.stringify(filtered));
   },
 };
 
-function validateApplication(application) {
+function validateApplication(application: ApplicationDTO): Application | null {
   if (
     !application ||
     !application.jobTitle ||
@@ -41,7 +43,7 @@ function validateApplication(application) {
     !application.status ||
     !application.applicationDate
   )
-    return false;
+    return null;
 
   const { jobTitle, company, status, applicationDate } = application;
 
@@ -51,10 +53,7 @@ function validateApplication(application) {
     company,
     status,
     applicationDate,
-    interviewDate:
-      application.interviewDate && application.interviewDate !== "null"
-        ? application.interviewDate
-        : "",
+    interviewDate: application.interviewDate || ("" as DateString),
     jobDescription:
       application.jobDescription && application.jobDescription !== "null"
         ? application.jobDescription

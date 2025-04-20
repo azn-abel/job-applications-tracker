@@ -1,7 +1,21 @@
 import React, { useEffect, useRef } from "react";
-import { sankey, sankeyLinkHorizontal } from "d3-sankey";
+import {
+  sankey,
+  SankeyGraph,
+  SankeyLink,
+  sankeyLinkHorizontal,
+  SankeyNode,
+} from "d3-sankey";
 import { useMediaQuery } from "@mantine/hooks";
 import * as d3 from "d3";
+
+import { Application } from "../../types/applications";
+
+type NodeData = { name: string; apps: Application[] };
+type LinkData = { apps: Application[] };
+
+type Node = SankeyNode<NodeData, LinkData>;
+type Link = SankeyLink<NodeData, LinkData>;
 
 const SankeyChart = ({
   applications,
@@ -11,8 +25,16 @@ const SankeyChart = ({
   applicationsNoResponse,
   interviewsNoResponse,
   interviewsRejected,
+}: {
+  applications: Application[];
+  interviews: Application[];
+  offers: Application[];
+  rejectionsNoInterview: Application[];
+  applicationsNoResponse: Application[];
+  interviewsNoResponse: Application[];
+  interviewsRejected: Application[];
 }) => {
-  const ref = useRef();
+  const ref = useRef(null);
 
   const smallScreen = useMediaQuery("max-width: 512px");
 
@@ -20,7 +42,7 @@ const SankeyChart = ({
     const width = 600;
     const height = 300;
 
-    const rawNodes = [
+    const rawNodes: Node[] = [
       { name: "Applications", apps: applications }, // 0
       { name: "Interviews", apps: interviews }, // 1
       { name: "Offers", apps: offers }, // 2
@@ -34,7 +56,7 @@ const SankeyChart = ({
       }, // 4
     ];
 
-    const rawLinks = [
+    const rawLinks: Link[] = [
       { source: 0, target: 1, value: interviews.length, apps: interviews },
       {
         source: 0,
@@ -66,7 +88,7 @@ const SankeyChart = ({
 
     const filteredLinks = rawLinks.filter((link) => link.value > 0);
 
-    const data = {
+    const data: SankeyGraph<Node, Link> = {
       nodes: rawNodes,
       links: filteredLinks,
     };
@@ -74,7 +96,7 @@ const SankeyChart = ({
     const svg = d3.select(ref.current).attr("viewBox", [0, 0, width, height]);
     svg.selectAll("*").remove();
 
-    const { nodes, links } = sankey()
+    const { nodes, links } = sankey<Node, Link>()
       .nodeWidth(15)
       .nodePadding(30)
       .extent([
@@ -101,7 +123,7 @@ const SankeyChart = ({
       .join("path")
       .attr("d", sankeyLinkHorizontal())
       .attr("stroke", "#a5b4fc")
-      .attr("stroke-width", (d) => Math.max(1, d.width))
+      .attr("stroke-width", (d) => Math.max(1, d.width || 0))
       .attr("opacity", 0.5);
 
     svg
@@ -115,8 +137,8 @@ const SankeyChart = ({
       .attr("dy", "0.35em")
       .attr("text-anchor", "end")
       .text((d) => `${d.name} (${d.value || 0})`)
-      .filter((d) => d.x0 < width / 2)
-      .attr("x", (d) => d.x1 + 6)
+      .filter((d) => d.x0! < width / 2)
+      .attr("x", (d) => (d && d.x1 ? d.x1 + 6 : 0))
       .attr("text-anchor", "start")
       .text((d) => `${d.name} (${d.value || 0})`);
 
@@ -133,11 +155,14 @@ const SankeyChart = ({
       .style("max-width", "50%");
 
     svg
-      .selectAll("path")
-      .on("mousemove", function (event, d) {
+      .selectAll<SVGPathElement, Link>("path")
+      .on("mousemove", function (event, d: SankeyLink<NodeData, LinkData>) {
         let companies = d.apps?.map((app) => app.company) || ["N/A"];
         companies = [...new Set(companies)];
         companies.sort();
+
+        const source = d.source as SankeyNode<NodeData, LinkData>;
+        const target = d.target as SankeyNode<NodeData, LinkData>;
 
         tooltip
           .style("display", "block")
@@ -145,15 +170,15 @@ const SankeyChart = ({
           .style("left", event.pageX + 10 + "px")
           .style("transform", "translate(0, 0)")
           .html(
-            `<strong>${d.source.name} → ${
-              d.target.name
+            `<strong>${source.name} → ${
+              target.name
             }</strong><br/>Companies: ${companies.join(", ")}`
           );
       })
       .on("mouseout", () => tooltip.style("display", "none"));
 
     svg
-      .selectAll("rect")
+      .selectAll<SVGPathElement, Node>("rect")
       .on("mousemove", function (event, d) {
         let companies = d.apps?.map((app) => app.company) || ["N/A"];
         companies = [...new Set(companies)];

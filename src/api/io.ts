@@ -1,15 +1,22 @@
-import Papa from "papaparse";
+import Papa, { ParseResult, ParseStepResult } from "papaparse";
 import localStorageAPI from "./applications";
+import { Application } from "../types/applications";
+import { AppShellProps } from "@mantine/core";
 
-export function downloadCSV(data, filename = "job_applications.csv") {
+export function downloadCSV(
+  data: Application[],
+  filename = "job_applications.csv"
+) {
   if (!data.length) return;
 
-  const headers = Object.keys(data[0]);
+  const headers: (keyof Application)[] = Object.keys(
+    data[0]
+  ) as (keyof Application)[];
 
   const encoder = new TextEncoder();
   const stream = new ReadableStream({
     start(controller) {
-      const escape = (str) => `"${String(str).replace(/"/g, '""')}"`;
+      const escape = (str: string) => `"${String(str).replace(/"/g, '""')}"`;
 
       // write headers
       controller.enqueue(encoder.encode(headers.map(escape).join(",") + "\n"));
@@ -18,7 +25,7 @@ export function downloadCSV(data, filename = "job_applications.csv") {
       for (const obj of data) {
         if (!obj.interviewDate) obj.interviewDate = "";
         if (!obj.applicationDate) obj.applicationDate = "";
-        const row = headers.map((key) => escape(obj[key]));
+        const row = headers.map((key: keyof Application) => escape(obj[key]));
         controller.enqueue(encoder.encode(row.join(",") + "\n"));
       }
 
@@ -38,12 +45,11 @@ export function downloadCSV(data, filename = "job_applications.csv") {
   });
 }
 
-export function importCSV(file) {
+export function importCSV(file: File): Promise<Application[]> {
   const ids = localStorageAPI.fetchApplications().map((row) => row.id);
-  const results = [];
-  const handleResult = (result) => {
-    if (!result.interviewDate || result.interviewDate === "null")
-      result.interviewDate = "";
+  const results: Application[] = [];
+  const handleResult = (result: ParseStepResult<Application>) => {
+    if (!result.data.interviewDate) result.data.interviewDate = "";
     if (!ids.includes(result.data.id)) results.push(result.data);
   };
   return new Promise((resolve, reject) => {

@@ -1,8 +1,10 @@
+import { Application } from "../types/applications";
+
 import { atom } from "jotai";
 
-export const selectedRowsAtom = atom([]);
+export const selectedRowsAtom = atom<string[]>([]);
 
-export const rowsAtom = atom([]);
+export const rowsAtom = atom<Application[]>([]);
 
 export const uniqueJobTitlesAtom = atom((get) => [
   ...new Set(get(rowsAtom).map((row) => row.jobTitle)),

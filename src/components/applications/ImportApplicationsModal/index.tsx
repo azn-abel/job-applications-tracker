@@ -5,9 +5,13 @@ import { FileButton, Group, Text, Flex } from "@mantine/core";
 import { importCSV } from "../../../api/io";
 import localStorageAPI from "../../../api/applications";
 
-export default function ImportApplicationsModal({ callback }) {
+export default function ImportApplicationsModal({
+  callback,
+}: {
+  callback: () => void;
+}) {
   const [opened, { open, close }] = useDisclosure(false);
-  const [file, setFile] = useState(null);
+  const [file, setFile] = useState<File | null>(null);
   const [error, setError] = useState("");
 
   const onClose = () => {
@@ -43,12 +47,7 @@ export default function ImportApplicationsModal({ callback }) {
         title="Import CSV"
       >
         <Group justify="center">
-          <FileButton
-            mt={4}
-            onChange={setFile}
-            accept="text/csv"
-            variant="default"
-          >
+          <FileButton onChange={setFile} accept="text/csv">
             {(props) => <Button {...props}>Select a file</Button>}
           </FileButton>
         </Group>

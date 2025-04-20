@@ -4,18 +4,28 @@ import localStorageAPI from "../api/applications";
 
 import SankeyChart from "../components/SankeyChart/sankey";
 
+import { Application } from "../types/applications";
+
 export default function Visualize() {
   const [loading, setLoading] = useState(true);
 
-  const [applications, setApplications] = useState([]);
-  const [interviews, setInterviews] = useState(0);
-  const [offers, setOffers] = useState(0);
-  const [noResponse, setNoResponse] = useState(0);
+  const [applications, setApplications] = useState<Application[]>([]);
+  const [interviews, setInterviews] = useState<Application[]>([]);
+  const [offers, setOffers] = useState<Application[]>([]);
+  const [noResponse, setNoResponse] = useState<Application[]>([]);
 
-  const [rejectionsNoInterview, setRejectionsNoInterview] = useState(0);
-  const [applicationsNoResponse, setApplicationsNoResponse] = useState(0);
-  const [interviewsNoResponse, setInterviewsNoResponse] = useState(0);
-  const [interviewsRejected, setInterviewsRejected] = useState(0);
+  const [rejectionsNoInterview, setRejectionsNoInterview] = useState<
+    Application[]
+  >([]);
+  const [applicationsNoResponse, setApplicationsNoResponse] = useState<
+    Application[]
+  >([]);
+  const [interviewsNoResponse, setInterviewsNoResponse] = useState<
+    Application[]
+  >([]);
+  const [interviewsRejected, setInterviewsRejected] = useState<Application[]>(
+    []
+  );
 
   useEffect(() => {
     const data = localStorageAPI.fetchApplications();
@@ -70,7 +80,6 @@ export default function Visualize() {
         applications={applications}
         interviews={interviews}
         offers={offers}
-        noResponse={noResponse}
         rejectionsNoInterview={rejectionsNoInterview}
         applicationsNoResponse={applicationsNoResponse}
         interviewsNoResponse={interviewsNoResponse}

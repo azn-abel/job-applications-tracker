@@ -1,4 +1,4 @@
-import { createRoot } from "react-dom/client";
+import { Container, createRoot } from "react-dom/client";
 import { createBrowserRouter, RouterProvider } from "react-router";
 import { createTheme, MantineProvider } from "@mantine/core";
 
@@ -6,7 +6,7 @@ import "@mantine/core/styles.css";
 import "@mantine/dates/styles.css";
 import "./main.css";
 
-import Home from "./routes/index.jsx";
+import Home from "./routes/index.js";
 import Heading from "./components/global/Heading/index.jsx";
 import Layout from "./Layout.jsx";
 import Error from "./Error.jsx";
@@ -29,7 +29,7 @@ const router = createBrowserRouter([
   },
 ]);
 
-createRoot(document.getElementById("root")).render(
+createRoot(document.getElementById("root") as Container).render(
   <MantineProvider theme={theme}>
     {/* <Heading /> */}
     <RouterProvider router={router} />
