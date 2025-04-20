@@ -23,6 +23,11 @@ import { validApplicationStates } from "../../../state/constants";
 import { handleStatusDropdownClose } from "../util";
 
 import { useState, useEffect } from "react";
+import {
+  Application,
+  ApplicationDTO,
+  DateString,
+} from "../../../types/applications";
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
@@ -33,18 +38,24 @@ export default function EditApplicationModal({
   close,
   application,
   callback,
+}: {
+  opened: boolean;
+  open: () => void;
+  close: () => void;
+  application: Application | null;
+  callback: () => void;
 }) {
   const [uniqueJobTitles] = useAtom(uniqueJobTitlesAtom);
   const [uniqueCompanies] = useAtom(uniqueCompaniesAtom);
 
-  const form = useForm({
+  const form = useForm<ApplicationDTO>({
     mode: "uncontrolled",
     initialValues: {
       jobTitle: "",
       company: "",
-      status: "",
-      applicationDate: null,
-      interviewDate: null,
+      status: "New",
+      applicationDate: "",
+      interviewDate: "",
       jobDescription: "",
     },
     validate: {
@@ -59,16 +70,18 @@ export default function EditApplicationModal({
 
   const [fetching, setFetching] = useState(false);
 
-  const updateApplication = async (values) => {
+  const updateApplication = async (values: ApplicationDTO) => {
     const body = { ...values };
-    body.interviewDate = formatDate(body.interviewDate);
-    body.applicationDate = formatDate(body.applicationDate);
+    body.interviewDate = formatDate(body.interviewDate) || "";
+    body.applicationDate = formatDate(body.applicationDate) || "";
 
     if (body.interviewDate && ["New", "Assessment"].includes(body.status))
       body.status = "Interview";
 
     setFetching(true);
-    const result = localStorageAPI.putApplication(application?.id, body);
+    let result;
+    if (application)
+      result = localStorageAPI.putApplication(application?.id, body);
     setFetching(false);
     if (!result) {
       // TODO: something went wrong
@@ -80,11 +93,8 @@ export default function EditApplicationModal({
 
   const removeApplication = async () => {
     setFetching(true);
-    const result = localStorageAPI.deleteApplication(application?.id);
+    application && localStorageAPI.deleteApplication(application?.id);
     setFetching(false);
-    if (!result) {
-      // TODO: something went wrong
-    }
 
     close();
     callback();
@@ -94,14 +104,14 @@ export default function EditApplicationModal({
     form.setValues({
       jobTitle: application?.jobTitle || "",
       company: application?.company || "",
-      status: application?.status || "",
+      status: application?.status || "New",
       jobDescription: application?.jobDescription || "",
       applicationDate: application?.applicationDate
-        ? dayjs(application?.applicationDate)
-        : null,
+        ? formatDate(application?.applicationDate)
+        : "",
       interviewDate: application?.interviewDate
-        ? dayjs(application?.interviewDate)
-        : null,
+        ? formatDate(application?.interviewDate)
+        : "",
     });
   }, [application]);
 
@@ -121,7 +131,10 @@ export default function EditApplicationModal({
         <form
           onSubmit={form.onSubmit(updateApplication)}
           onKeyDown={(e) => {
-            if (e.code === "Enter" && e.target.tagName !== "TEXTAREA") {
+            if (
+              e.code === "Enter" &&
+              (e.target as HTMLInputElement).tagName !== "TEXTAREA"
+            ) {
               e.preventDefault();
             }
           }}
@@ -160,9 +173,9 @@ export default function EditApplicationModal({
             firstDayOfWeek={0}
             weekendDays={[]}
             withAsterisk
-            onTouchEnd={(e) => (e.target.readOnly = true)}
+            onTouchEnd={(e) => ((e.target as HTMLInputElement).readOnly = true)}
             key={form.key("applicationDate")}
-            {...form.getInputProps("applicationDate", { type: "date" })}
+            {...form.getInputProps("applicationDate")}
           />
           <DateInput
             label="Interview Date"
@@ -172,9 +185,9 @@ export default function EditApplicationModal({
             preserveTime={false}
             firstDayOfWeek={0}
             weekendDays={[]}
-            onTouchEnd={(e) => (e.target.readOnly = true)}
+            onTouchEnd={(e) => ((e.target as HTMLInputElement).readOnly = true)}
             key={form.key("interviewDate")}
-            {...form.getInputProps("interviewDate", { type: "date" })}
+            {...form.getInputProps("interviewDate")}
           />
           <Textarea
             label="Job Description"
@@ -206,7 +219,7 @@ export default function EditApplicationModal({
   );
 }
 
-function formatDate(date) {
-  if (!date) return null;
-  return dayjs(date).format("YYYY-MM-DD");
+function formatDate(date?: Date | DateString): DateString {
+  if (!date) return "";
+  return dayjs(date).format("YYYY-MM-DD") as DateString;
 }

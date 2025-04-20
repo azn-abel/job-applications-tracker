@@ -169,7 +169,8 @@ function ApplicationsTable({
   const [sortBy, setSortBy] = useState<keyof ApplicationDTO | null>(null);
   const [reverseSortDirection, setReverseSortDirection] = useState(false);
 
-  const [selectedApplication, setSelectedApplication] = useState({});
+  const [selectedApplication, setSelectedApplication] =
+    useState<Application | null>(null);
 
   const [selection, setSelection] = useAtom(selectedRowsAtom);
 

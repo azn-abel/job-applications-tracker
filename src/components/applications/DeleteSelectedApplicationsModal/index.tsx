@@ -1,15 +1,15 @@
 import { useDisclosure } from "@mantine/hooks";
 import { Modal, Button, Flex, Text } from "@mantine/core";
-import { DateInput } from "@mantine/dates";
-import { isNotEmpty, useForm } from "@mantine/form";
 import localStorageAPI from "../../../api/applications";
-import { useEffect, useState } from "react";
-import dayjs from "dayjs";
 
 import { useAtom } from "jotai";
 import { selectedRowsAtom } from "../../../state";
 
-export default function DeleteSelectedApplicationModal({ callback }) {
+export default function DeleteSelectedApplicationModal({
+  callback,
+}: {
+  callback: () => void;
+}) {
   const [opened, { open, close }] = useDisclosure(false);
 
   const [selectedRows, setSelectedRows] = useAtom(selectedRowsAtom);
@@ -56,9 +56,4 @@ export default function DeleteSelectedApplicationModal({ callback }) {
       </Button>
     </>
   );
-}
-
-function formatDate(date) {
-  if (!date) return null;
-  return dayjs(date).format("YYYY-MM-DD");
 }
