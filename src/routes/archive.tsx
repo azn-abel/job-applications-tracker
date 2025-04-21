@@ -47,6 +47,8 @@ import { Application, ApplicationDTO } from '../types/applications'
 
 import { ReactNode } from 'react'
 
+import { MotionContainer, animationProps } from '../state/constants'
+
 export default function Archive() {
   const [applications, setApplications] = useAtom(rowsAtom)
   const [selectedRows] = useAtom(selectedRowsAtom)
@@ -72,8 +74,7 @@ export default function Archive() {
 
   return (
     <>
-      <LoadingOverlay visible={false} zIndex={199} />
-      <Container pos="relative">
+      <MotionContainer {...animationProps} pos="relative">
         <Flex justify="space-between" align="center" wrap="wrap">
           <Title>Archive</Title>
           <Select data={['All']} defaultValue="All" />
@@ -139,7 +140,7 @@ export default function Archive() {
             callback={fillApplications}
           />
         </Card>
-      </Container>
+      </MotionContainer>
     </>
   )
 }

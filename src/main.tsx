@@ -33,7 +33,6 @@ const router = createBrowserRouter([
 
 createRoot(document.getElementById('root') as Container).render(
   <MantineProvider theme={theme}>
-    {/* <Heading /> */}
     <RouterProvider router={router} />
   </MantineProvider>
 )

@@ -4,12 +4,16 @@ import classes from './Heading.module.css'
 
 import { Link } from 'react-router'
 import { useDisclosure } from '@mantine/hooks'
+import { motion, AnimatePresence } from 'framer-motion'
+import { animationProps } from '../../../state/constants'
 
 const links = [
   { link: '/', label: 'Home' },
   { link: '/visualize', label: 'Visualize' },
   { link: '/archive', label: 'Archive' },
 ]
+
+const MotionCard = motion.create(Card as any)
 
 export default function Heading() {
   const [opened, { toggle }] = useDisclosure(false)
@@ -21,6 +25,7 @@ export default function Heading() {
       className={classes.link}
       data-active={active === link.link || undefined}
       onClick={() => {
+        toggle()
         setActive(link.link)
       }}
     >
@@ -55,24 +60,28 @@ export default function Heading() {
           {items}
         </Group>
         <Burger opened={opened} onClick={toggle} hiddenFrom="xs" size="sm" />
-        <Card
-          shadow="md"
-          radius={8}
-          hiddenFrom="xs"
-          display={opened ? 'block' : 'none'}
-          pos="absolute"
-          top={56}
-          right={8}
-        >
-          <Flex
-            className={classes.links}
-            direction={'column'}
-            gap={8}
-            bg={'white'}
-          >
-            {items}
-          </Flex>
-        </Card>
+        <AnimatePresence>
+          {opened && (
+            <MotionCard
+              shadow="md"
+              radius={8}
+              hiddenFrom="xs"
+              pos="absolute"
+              top={64}
+              right={8}
+              {...animationProps}
+            >
+              <Flex
+                className={classes.links}
+                direction={'column'}
+                gap={8}
+                bg={'white'}
+              >
+                {items}
+              </Flex>
+            </MotionCard>
+          )}
+        </AnimatePresence>
       </Container>
     </header>
   )

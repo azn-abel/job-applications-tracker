@@ -105,7 +105,6 @@ export default function EditApplicationModal({
   }
 
   useEffect(() => {
-    console.log(application)
     form.setValues({
       jobTitle: application?.jobTitle || '',
       company: application?.company || '',

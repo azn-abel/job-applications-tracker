@@ -43,6 +43,10 @@ import { conditionalS } from '../utils'
 import { Application, ApplicationDTO } from '../types/applications'
 
 import { ReactNode } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
+import { animationProps } from '../state/constants'
+
+import { MotionContainer } from '../state/constants'
 
 function Home() {
   const [applications, setApplications] = useAtom(rowsAtom)
@@ -63,14 +67,22 @@ function Home() {
     setApplications(response)
   }
 
+  const exportCSV = () => {
+    downloadCSV(
+      applications.filter((row) => {
+        if (!row.id) return false
+        return selectedRows.includes(row.id)
+      })
+    )
+  }
+
   useEffect(() => {
     fillApplications()
   }, [])
 
   return (
     <>
-      <LoadingOverlay visible={false} zIndex={199} />
-      <Container pos="relative">
+      <MotionContainer {...animationProps} pos="relative">
         <Flex justify="space-between" align="center" wrap="wrap">
           <Title>This season...</Title>
           <Button>Archive</Button>
@@ -86,13 +98,7 @@ function Home() {
           </Grid.Col>
           <Grid.Col span={4}>
             <Card shadow="md" radius={8}>
-              <Title order={2}>
-                {applications?.filter(
-                  (ele) =>
-                    ['Interview', 'Offer'].includes(ele.status) ||
-                    ele.interviewDate
-                ).length || 0}
-              </Title>
+              <Title order={2}>{numInterviews || 0}</Title>
               <Text size={smallScreen ? 'xs' : 'md'}>
                 Interview{conditionalS(numInterviews)}
               </Text>
@@ -100,10 +106,7 @@ function Home() {
           </Grid.Col>
           <Grid.Col span={4}>
             <Card shadow="md" radius={8}>
-              <Title order={2}>
-                {applications?.filter((ele) => ele.status === 'Offer').length ||
-                  0}
-              </Title>
+              <Title order={2}>{numOffers || 0}</Title>
               <Text size={smallScreen ? 'xs' : 'md'}>
                 Offer{conditionalS(numOffers)}
               </Text>
@@ -122,21 +125,10 @@ function Home() {
               </>
             )}
             {selectedRows?.length > 0 && (
-              <DeleteSelectedApplicationModal callback={fillApplications} />
-            )}
-            {selectedRows?.length > 0 && (
-              <Button
-                onClick={() =>
-                  downloadCSV(
-                    applications.filter((row) => {
-                      if (!row.id) return false
-                      return selectedRows.includes(row.id)
-                    })
-                  )
-                }
-              >
-                Export
-              </Button>
+              <>
+                <DeleteSelectedApplicationModal callback={fillApplications} />
+                <Button onClick={exportCSV}>Export</Button>
+              </>
             )}
           </Flex>
         </Flex>
@@ -153,7 +145,7 @@ function Home() {
             callback={fillApplications}
           />
         </Card>
-      </Container>
+      </MotionContainer>
     </>
   )
 }

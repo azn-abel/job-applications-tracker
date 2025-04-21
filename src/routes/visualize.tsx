@@ -6,6 +6,8 @@ import SankeyChart from '../components/SankeyChart/sankey'
 
 import { Application } from '../types/applications'
 
+import { animationProps, MotionFlex } from '../state/constants'
+
 export default function Visualize() {
   const [loading, setLoading] = useState(true)
 
@@ -57,34 +59,23 @@ export default function Visualize() {
     setLoading(false)
   }, [])
 
-  console.log(loading, applications)
-
-  if (loading)
-    return (
-      <Flex justify="center" align="start">
-        <Title order={2}>Loading...</Title>
-      </Flex>
-    )
-
-  if (!loading && applications.length === 0) {
-    return (
-      <Flex justify="center" align="start">
-        <Title order={2}>Nothing to show.</Title>
-      </Flex>
-    )
-  }
-
   return (
-    <Flex justify="center" align="start">
-      <SankeyChart
-        applications={applications}
-        interviews={interviews}
-        offers={offers}
-        rejectionsNoInterview={rejectionsNoInterview}
-        applicationsNoResponse={applicationsNoResponse}
-        interviewsNoResponse={interviewsNoResponse}
-        interviewsRejected={interviewsRejected}
-      />
-    </Flex>
+    <>
+      <MotionFlex {...animationProps} justify="center" align="start">
+        {applications.length === 0 ? (
+          <Title order={2}>Nothing to show.</Title>
+        ) : (
+          <SankeyChart
+            applications={applications}
+            interviews={interviews}
+            offers={offers}
+            rejectionsNoInterview={rejectionsNoInterview}
+            applicationsNoResponse={applicationsNoResponse}
+            interviewsNoResponse={interviewsNoResponse}
+            interviewsRejected={interviewsRejected}
+          />
+        )}
+      </MotionFlex>
+    </>
   )
 }
