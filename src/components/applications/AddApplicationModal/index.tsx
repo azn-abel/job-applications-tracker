@@ -21,7 +21,11 @@ import { useAtom } from 'jotai'
 import { validApplicationStates } from '../../../state/constants'
 
 import { handleStatusDropdownClose } from '../util'
-import { ApplicationDTO, DateString } from '../../../types/applications'
+import {
+  ApplicationDTO,
+  ApplicationInput,
+  DateString,
+} from '../../../types/applications'
 
 export default function AddApplicationModal({
   callback,
@@ -34,14 +38,14 @@ export default function AddApplicationModal({
   const [uniqueJobTitles] = useAtom(uniqueJobTitlesAtom)
   const [uniqueCompanies] = useAtom(uniqueCompaniesAtom)
 
-  const form = useForm<ApplicationDTO>({
+  const form = useForm<ApplicationInput>({
     mode: 'uncontrolled',
     initialValues: {
       jobTitle: '',
       company: '',
       status: 'New',
-      applicationDate: '',
-      interviewDate: '',
+      applicationDate: null,
+      interviewDate: null,
       jobDescription: '',
     },
     validate: {
@@ -56,10 +60,12 @@ export default function AddApplicationModal({
     },
   })
 
-  const createApplication = async (values: ApplicationDTO) => {
-    const body: ApplicationDTO = { ...values }
-    body.applicationDate = formatDate(body.applicationDate) || ''
-    body.interviewDate = formatDate(body.interviewDate) || ''
+  const createApplication = async (values: ApplicationInput) => {
+    const body: ApplicationDTO = {
+      ...values,
+      applicationDate: formatDate(values.applicationDate) || '',
+      interviewDate: formatDate(values.interviewDate) || '',
+    }
 
     if (body.interviewDate && ['New', 'Assessment'].includes(body.status))
       body.status = 'Interview'
@@ -81,8 +87,8 @@ export default function AddApplicationModal({
       company: '',
       status: 'New',
       jobDescription: '',
-      applicationDate: '',
-      interviewDate: '',
+      applicationDate: null,
+      interviewDate: null,
     })
   }, [opened])
 
@@ -186,7 +192,7 @@ export default function AddApplicationModal({
   )
 }
 
-function formatDate(date?: Date | string): DateString | null {
+function formatDate(date?: Date | null): DateString | null {
   if (!date) return null
   return dayjs(date).format('YYYY-MM-DD') as DateString
 }

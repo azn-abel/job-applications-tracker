@@ -33,3 +33,13 @@ export type ApplicationDTO = {
   interviewDate?: DateString
   jobDescription?: string
 }
+
+export type ApplicationInput = {
+  id?: string
+  jobTitle: string
+  company: string
+  status: ApplicationStatus
+  applicationDate: Date | null
+  interviewDate?: Date | null
+  jobDescription?: string
+}

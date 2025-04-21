@@ -1,9 +1,13 @@
 import { validApplicationStates } from '../../state/constants'
 import { UseFormReturnType } from '@mantine/form'
-import { ApplicationDTO, ApplicationStatus } from '../../types/applications'
+import {
+  ApplicationDTO,
+  ApplicationInput,
+  ApplicationStatus,
+} from '../../types/applications'
 
 export const handleStatusDropdownClose = (
-  form: UseFormReturnType<ApplicationDTO>
+  form: UseFormReturnType<ApplicationInput>
 ) => {
   const status = form.getValues().status
   const match: ApplicationStatus = validApplicationStates.find((item) =>

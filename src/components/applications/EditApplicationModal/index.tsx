@@ -26,6 +26,7 @@ import { useState, useEffect } from 'react'
 import {
   Application,
   ApplicationDTO,
+  ApplicationInput,
   DateString,
 } from '../../../types/applications'
 
@@ -48,14 +49,14 @@ export default function EditApplicationModal({
   const [uniqueJobTitles] = useAtom(uniqueJobTitlesAtom)
   const [uniqueCompanies] = useAtom(uniqueCompaniesAtom)
 
-  const form = useForm<ApplicationDTO>({
+  const form = useForm<ApplicationInput>({
     mode: 'uncontrolled',
     initialValues: {
       jobTitle: '',
       company: '',
       status: 'New',
-      applicationDate: '',
-      interviewDate: '',
+      applicationDate: null,
+      interviewDate: null,
       jobDescription: '',
     },
     validate: {
@@ -71,10 +72,12 @@ export default function EditApplicationModal({
 
   const [fetching, setFetching] = useState(false)
 
-  const updateApplication = async (values: ApplicationDTO) => {
-    const body = { ...values }
-    body.interviewDate = formatDate(body.interviewDate) || ''
-    body.applicationDate = formatDate(body.applicationDate) || ''
+  const updateApplication = async (values: ApplicationInput) => {
+    const body: ApplicationDTO = {
+      ...values,
+      applicationDate: formatDate(values.applicationDate!) || '',
+      interviewDate: formatDate(values.interviewDate!) || '',
+    }
 
     if (body.interviewDate && ['New', 'Assessment'].includes(body.status))
       body.status = 'Interview'
@@ -102,17 +105,16 @@ export default function EditApplicationModal({
   }
 
   useEffect(() => {
+    console.log(application)
     form.setValues({
       jobTitle: application?.jobTitle || '',
       company: application?.company || '',
       status: application?.status || 'New',
       jobDescription: application?.jobDescription || '',
-      applicationDate: application?.applicationDate
-        ? formatDate(application?.applicationDate)
-        : '',
+      applicationDate: dayjs(application?.applicationDate).toDate(),
       interviewDate: application?.interviewDate
-        ? formatDate(application?.interviewDate)
-        : '',
+        ? dayjs(application.interviewDate).toDate()
+        : null,
     })
   }, [application])
 
