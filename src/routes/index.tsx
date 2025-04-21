@@ -43,10 +43,11 @@ import { conditionalS } from '../utils'
 import { Application, ApplicationDTO } from '../types/applications'
 
 import { ReactNode } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
 import { animationProps } from '../state/constants'
 
 import { MotionContainer } from '../state/constants'
+
+import ArchiveCollectionModal from '../components/archive/ArchiveCollectionModal'
 
 function Home() {
   const [applications, setApplications] = useAtom(rowsAtom)
@@ -85,7 +86,7 @@ function Home() {
       <MotionContainer {...animationProps} pos="relative">
         <Flex justify="space-between" align="center" wrap="wrap">
           <Title>This season...</Title>
-          <Button>Archive</Button>
+          <ArchiveCollectionModal callback={fillApplications} />
         </Flex>
         <Grid mt={24} mb={24}>
           <Grid.Col span={4}>

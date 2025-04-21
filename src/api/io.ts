@@ -5,7 +5,7 @@ import { AppShellProps } from '@mantine/core'
 
 export function downloadCSV(
   data: Application[],
-  filename = 'job_applications.csv'
+  filename = 'Job Applications.csv'
 ) {
   if (!data.length) return
 

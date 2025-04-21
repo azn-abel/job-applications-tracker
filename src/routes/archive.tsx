@@ -1,23 +1,19 @@
 import { useState, useEffect, ChangeEvent } from 'react'
 import {
-  Container,
   Title,
   Card,
   Grid,
   Text,
   TextInput,
   Flex,
-  LoadingOverlay,
   UnstyledButton,
   Center,
   keys,
-  Checkbox,
   Group,
   Table,
   Button,
   Select,
 } from '@mantine/core'
-import cx from 'clsx'
 import {
   IconChevronDown,
   IconChevronUp,
@@ -27,20 +23,12 @@ import {
   IconTrash,
 } from '@tabler/icons-react'
 
-import AddApplicationModal from '../components/applications/AddApplicationModal'
 import EditApplicationModal from '../components/applications/EditApplicationModal'
-import DeleteSelectedApplicationModal from '../components/applications/DeleteSelectedApplicationsModal'
-import ImportApplicationsModal from '../components/applications/ImportApplicationsModal'
 
 import classes from './Index.module.css'
 
-import ApplicationsAPI from '../api/applications'
-
 import { useDisclosure, useMediaQuery } from '@mantine/hooks'
 
-import { useAtom } from 'jotai'
-import { rowsAtom, selectedRowsAtom } from '../state'
-import { downloadCSV } from '../api/io'
 import { conditionalS } from '../utils'
 
 import { Application, ApplicationDTO } from '../types/applications'
@@ -48,10 +36,14 @@ import { Application, ApplicationDTO } from '../types/applications'
 import { ReactNode } from 'react'
 
 import { MotionContainer, animationProps } from '../state/constants'
+import ArchiveAPI from '../api/archive'
 
 export default function Archive() {
-  const [applications, setApplications] = useAtom(rowsAtom)
-  const [selectedRows] = useAtom(selectedRowsAtom)
+  const [applications, setApplications] = useState<Application[]>([])
+  const collections = ['All', ...Object.keys(ArchiveAPI.fetchArchive())]
+  const [selectedCollection, setSelectedCollection] = useState<string | null>(
+    'All'
+  )
   const numInterviews = applications.filter((app) =>
     ['Interview', 'Offer'].includes(app.status)
   ).length
@@ -60,7 +52,7 @@ export default function Archive() {
   const smallScreen = useMediaQuery('(max-width: 512px)')
 
   const fillApplications = async () => {
-    const response = ApplicationsAPI.fetchApplications()
+    const response = ArchiveAPI.fetchCollection(selectedCollection)
     if (!response) {
       // something went wrong
       return
@@ -68,16 +60,27 @@ export default function Archive() {
     setApplications(response)
   }
 
+  useEffect(() => {}, [])
+
   useEffect(() => {
+    if (!selectedCollection) {
+      setSelectedCollection('All')
+      return
+    }
     fillApplications()
-  }, [])
+  }, [selectedCollection])
 
   return (
     <>
       <MotionContainer {...animationProps} pos="relative">
         <Flex justify="space-between" align="center" wrap="wrap">
           <Title>Archive</Title>
-          <Select data={['All']} defaultValue="All" />
+          <Select
+            data={collections}
+            value={selectedCollection}
+            onChange={(value) => setSelectedCollection(value)}
+            defaultValue="All"
+          />
         </Flex>
         <Grid mt={24} mb={24}>
           <Grid.Col span={4}>
@@ -119,10 +122,16 @@ export default function Archive() {
             <Title order={2}>Applications</Title>
           </Flex>
           <Flex gap={12} align="center">
-            <Button variant="default">
+            <Button
+              variant="default"
+              onClick={() => ArchiveAPI.downloadCollection(selectedCollection)}
+            >
               {smallScreen ? <IconFileExport /> : 'Export CSV'}
             </Button>
-            <Button color="red">
+            <Button
+              color="red"
+              onClick={() => ArchiveAPI.downloadCollection(selectedCollection)}
+            >
               {smallScreen ? <IconTrash /> : 'Delete'}
             </Button>
           </Flex>
@@ -162,21 +171,6 @@ function ApplicationsTable({
   const [selectedApplication, setSelectedApplication] =
     useState<Application | null>(null)
 
-  const [selection, setSelection] = useAtom(selectedRowsAtom)
-
-  const toggleRow = (id: string) =>
-    setSelection((current) =>
-      current.includes(id)
-        ? current.filter((item) => item !== id)
-        : [...current, id]
-    )
-  const toggleAll = () =>
-    setSelection((current) =>
-      current.length === applications.length
-        ? []
-        : applications.map((item) => item.id as string)
-    )
-
   useEffect(() => {
     setSortedApplications(applications)
   }, [applications])
@@ -203,7 +197,6 @@ function ApplicationsTable({
   }
 
   const sortedRows = sortedApplications.map((application, index) => {
-    const selected = selection.includes(application.id as string)
     return (
       <Table.Tr
         key={index}
@@ -212,7 +205,6 @@ function ApplicationsTable({
           open()
         }}
         style={{ cursor: 'pointer' }}
-        className={cx({ [classes.rowSelected]: selected })}
       >
         <Table.Td>{application.jobTitle}</Table.Td>
         <Table.Td>{application.company}</Table.Td>

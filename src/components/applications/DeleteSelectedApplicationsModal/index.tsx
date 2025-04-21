@@ -16,7 +16,6 @@ export default function DeleteSelectedApplicationModal({
 
   const deleteApplications = async () => {
     for (let row of selectedRows) {
-      console.log(row)
       ApplicationsAPI.deleteApplication(row)
     }
     setSelectedRows([])

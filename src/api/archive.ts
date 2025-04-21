@@ -11,8 +11,17 @@ const ArchiveAPI = {
     return raw ? JSON.parse(raw) : {}
   },
 
-  fetchCollection(name: string) {
+  fetchCollection(name: string | null) {
+    if (!name) {
+      throw Error('no name provided')
+    }
     const archives = this.fetchArchive()
+    if (name === 'All') {
+      return Object.values(archives).reduce(
+        (prev, curr) => [...prev, ...curr],
+        []
+      )
+    }
     if (!archives[name]) throw Error('no archive found with name ' + name)
     return archives[name]
   },
@@ -63,12 +72,13 @@ const ArchiveAPI = {
     localStorage.setItem(this.key, JSON.stringify(data))
   },
 
-  downloadCollection(name: string) {
-    const archives = this.fetchArchive()
+  downloadCollection(name: string | null) {
+    if (!name) throw Error('no name provided')
+    const collection = this.fetchCollection(name)
 
-    if (!archives[name]) throw Error('no archive found with name ' + name)
+    if (!collection) throw Error('no archive found with name ' + name)
 
-    downloadCSV(archives[name], `Archived Job Applications - ${name}.csv`)
+    downloadCSV(collection, `Archived Job Applications - ${name}.csv`)
   },
 }
 
