@@ -21,7 +21,6 @@ export default function Heading() {
       className={classes.link}
       data-active={active === link.link || undefined}
       onClick={() => {
-        toggle()
         setActive(link.link)
       }}
     >
