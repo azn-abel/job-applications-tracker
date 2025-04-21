@@ -1,0 +1,75 @@
+import { Collections } from '../types/archive'
+
+import ApplicationsAPI from './applications'
+import { downloadCSV } from './io'
+
+const ArchiveAPI = {
+  key: 'archive',
+
+  fetchArchive(): Collections {
+    const raw: string | null = localStorage.getItem(this.key)
+    return raw ? JSON.parse(raw) : {}
+  },
+
+  fetchCollection(name: string) {
+    const archives = this.fetchArchive()
+    if (!archives[name]) throw Error('no archive found with name ' + name)
+    return archives[name]
+  },
+
+  archiveCollection(name: string) {
+    if (!name || name.trim() === '')
+      throw Error('archive name cannot be empty or whitespace')
+    if (name.length > 50)
+      throw Error('archive name cannot be longer than 50 characters')
+    if (!/^[a-zA-Z0-9 ]+$/.test(name))
+      throw Error(
+        'archive name can only contain alphanumeric characters and spaces'
+      )
+
+    const applications = ApplicationsAPI.fetchApplications()
+    const archives = this.fetchArchive()
+
+    if (archives[name])
+      throw Error('archive with name ' + name + ' already exists')
+
+    archives[name] = applications
+
+    localStorage.setItem(this.key, JSON.stringify(archives))
+    localStorage.setItem(ApplicationsAPI.key, '[]')
+  },
+
+  deleteCollection(name: string) {
+    const archives = this.fetchArchive()
+
+    if (!archives[name]) throw Error('no archive found with name ' + name)
+
+    delete archives[name]
+
+    localStorage.setItem(this.key, JSON.stringify(archives))
+  },
+
+  renameArchive(oldName: string, newName: string) {
+    const archives = this.fetchArchive()
+
+    if (!archives[oldName]) throw Error('no archive found with name ' + oldName)
+    if (archives[newName] && newName !== oldName)
+      throw Error('archive with name ' + newName + ' already exists')
+
+    const data = JSON.parse(JSON.stringify(archives[oldName]))
+    delete archives[oldName]
+    archives[newName] = data
+
+    localStorage.setItem(this.key, JSON.stringify(data))
+  },
+
+  downloadCollection(name: string) {
+    const archives = this.fetchArchive()
+
+    if (!archives[name]) throw Error('no archive found with name ' + name)
+
+    downloadCSV(archives[name], `Archived Job Applications - ${name}.csv`)
+  },
+}
+
+export default ArchiveAPI

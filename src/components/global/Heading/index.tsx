@@ -1,15 +1,18 @@
-import { Container, Text, Group } from '@mantine/core'
+import { Container, Text, Group, Burger, Flex, Card } from '@mantine/core'
 import { useState, useEffect } from 'react'
 import classes from './Heading.module.css'
 
 import { Link } from 'react-router'
+import { useDisclosure } from '@mantine/hooks'
 
 const links = [
   { link: '/', label: 'Home' },
   { link: '/visualize', label: 'Visualize' },
+  { link: '/archive', label: 'Archive' },
 ]
 
 export default function Heading() {
+  const [opened, { toggle }] = useDisclosure(false)
   const [active, setActive] = useState(window.location.pathname)
   const items = links.map((link) => (
     <Link
@@ -17,7 +20,8 @@ export default function Heading() {
       to={link.link}
       className={classes.link}
       data-active={active === link.link || undefined}
-      onClick={(event) => {
+      onClick={() => {
+        toggle()
         setActive(link.link)
       }}
     >
@@ -44,11 +48,32 @@ export default function Heading() {
       className={classes.header}
       style={{ zIndex: 200, position: 'relative' }}
     >
-      <Container size="md" className={classes.inner}>
+      <Container size="md" className={classes.inner} pos="relative">
         <Link to="/" style={{ textDecoration: 'none', color: 'black' }}>
           <Text>Job Tracker</Text>
         </Link>
-        <Group gap={5}>{items}</Group>
+        <Group gap={5} visibleFrom="xs">
+          {items}
+        </Group>
+        <Burger opened={opened} onClick={toggle} hiddenFrom="xs" size="sm" />
+        <Card
+          shadow="md"
+          radius={8}
+          hiddenFrom="xs"
+          display={opened ? 'block' : 'none'}
+          pos="absolute"
+          top={56}
+          right={8}
+        >
+          <Flex
+            className={classes.links}
+            direction={'column'}
+            gap={8}
+            bg={'white'}
+          >
+            {items}
+          </Flex>
+        </Card>
       </Container>
     </header>
   )

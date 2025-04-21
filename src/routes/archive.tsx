@@ -15,6 +15,7 @@ import {
   Group,
   Table,
   Button,
+  Select,
 } from '@mantine/core'
 import cx from 'clsx'
 import {
@@ -22,6 +23,8 @@ import {
   IconChevronUp,
   IconSearch,
   IconSelector,
+  IconFileExport,
+  IconTrash,
 } from '@tabler/icons-react'
 
 import AddApplicationModal from '../components/applications/AddApplicationModal'
@@ -44,7 +47,7 @@ import { Application, ApplicationDTO } from '../types/applications'
 
 import { ReactNode } from 'react'
 
-function Home() {
+export default function Archive() {
   const [applications, setApplications] = useAtom(rowsAtom)
   const [selectedRows] = useAtom(selectedRowsAtom)
   const numInterviews = applications.filter((app) =>
@@ -72,8 +75,8 @@ function Home() {
       <LoadingOverlay visible={false} zIndex={199} />
       <Container pos="relative">
         <Flex justify="space-between" align="center" wrap="wrap">
-          <Title>This season...</Title>
-          <Button>Archive</Button>
+          <Title>Archive</Title>
+          <Select data={['All']} defaultValue="All" />
         </Flex>
         <Grid mt={24} mb={24}>
           <Grid.Col span={4}>
@@ -114,30 +117,13 @@ function Home() {
           <Flex gap={12}>
             <Title order={2}>Applications</Title>
           </Flex>
-          <Flex gap={12}>
-            {selectedRows?.length === 0 && (
-              <>
-                <AddApplicationModal callback={fillApplications} />
-                <ImportApplicationsModal callback={fillApplications} />
-              </>
-            )}
-            {selectedRows?.length > 0 && (
-              <DeleteSelectedApplicationModal callback={fillApplications} />
-            )}
-            {selectedRows?.length > 0 && (
-              <Button
-                onClick={() =>
-                  downloadCSV(
-                    applications.filter((row) => {
-                      if (!row.id) return false
-                      return selectedRows.includes(row.id)
-                    })
-                  )
-                }
-              >
-                Export
-              </Button>
-            )}
+          <Flex gap={12} align="center">
+            <Button variant="default">
+              {smallScreen ? <IconFileExport /> : 'Export CSV'}
+            </Button>
+            <Button color="red">
+              {smallScreen ? <IconTrash /> : 'Delete'}
+            </Button>
           </Flex>
         </Flex>
         <Card
@@ -227,15 +213,6 @@ function ApplicationsTable({
         style={{ cursor: 'pointer' }}
         className={cx({ [classes.rowSelected]: selected })}
       >
-        <Table.Td>
-          <Checkbox
-            checked={selection.includes(application.id)}
-            onChange={() => {
-              toggleRow(application.id)
-              close()
-            }}
-          />
-        </Table.Td>
         <Table.Td>{application.jobTitle}</Table.Td>
         <Table.Td>{application.company}</Table.Td>
         <Table.Td>{application.status}</Table.Td>
@@ -264,16 +241,6 @@ function ApplicationsTable({
       <Table highlightOnHover>
         <Table.Thead>
           <Table.Tr>
-            <Table.Th w={40}>
-              <Checkbox
-                onChange={toggleAll}
-                checked={selection.length === applications?.length}
-                indeterminate={
-                  selection.length > 0 &&
-                  selection.length !== applications?.length
-                }
-              />
-            </Table.Th>
             <Th
               sorted={sortBy === 'jobTitle'}
               reversed={reverseSortDirection}
@@ -382,5 +349,3 @@ function sortData(
     search
   )
 }
-
-export default Home

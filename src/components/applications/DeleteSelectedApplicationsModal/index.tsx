@@ -1,6 +1,6 @@
 import { useDisclosure } from '@mantine/hooks'
 import { Modal, Button, Flex, Text } from '@mantine/core'
-import localStorageAPI from '../../../api/applications'
+import ApplicationsAPI from '../../../api/applications'
 
 import { useAtom } from 'jotai'
 import { selectedRowsAtom } from '../../../state'
@@ -17,7 +17,7 @@ export default function DeleteSelectedApplicationModal({
   const deleteApplications = async () => {
     for (let row of selectedRows) {
       console.log(row)
-      localStorageAPI.deleteApplication(row)
+      ApplicationsAPI.deleteApplication(row)
     }
     setSelectedRows([])
     close()

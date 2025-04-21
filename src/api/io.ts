@@ -1,5 +1,5 @@
 import Papa, { ParseResult, ParseStepResult } from 'papaparse'
-import localStorageAPI from './applications'
+import ApplicationsAPI from './applications'
 import { Application } from '../types/applications'
 import { AppShellProps } from '@mantine/core'
 
@@ -46,7 +46,7 @@ export function downloadCSV(
 }
 
 export function importCSV(file: File): Promise<Application[]> {
-  const ids = localStorageAPI.fetchApplications().map((row) => row.id)
+  const ids = ApplicationsAPI.fetchApplications().map((row) => row.id)
   const results: Application[] = []
   const handleResult = (result: ParseStepResult<Application>) => {
     if (!result.data.interviewDate) result.data.interviewDate = ''

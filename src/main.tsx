@@ -7,11 +7,12 @@ import '@mantine/dates/styles.css'
 import './main.css'
 
 import Home from './routes/index.js'
-import Heading from './components/global/Heading/index.jsx'
-import Layout from './Layout.jsx'
-import Error from './Error.jsx'
-import NotFound from './404.jsx'
-import Visualize from './routes/visualize.jsx'
+import Heading from './components/global/Heading/index'
+import Layout from './Layout'
+import Error from './Error'
+import NotFound from './404'
+import Visualize from './routes/visualize'
+import Archive from './routes/archive'
 const theme = createTheme({
   /** Put your mantine theme override here */
 })
@@ -24,6 +25,7 @@ const router = createBrowserRouter([
     children: [
       { index: true, Component: Home },
       { path: 'visualize', Component: Visualize },
+      { path: 'archive', Component: Archive },
       { path: '*', Component: NotFound },
     ],
   },

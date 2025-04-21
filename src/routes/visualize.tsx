@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Flex, Title } from '@mantine/core'
-import localStorageAPI from '../api/applications'
+import ApplicationsAPI from '../api/applications'
 
 import SankeyChart from '../components/SankeyChart/sankey'
 
@@ -28,7 +28,7 @@ export default function Visualize() {
   )
 
   useEffect(() => {
-    const data = localStorageAPI.fetchApplications()
+    const data = ApplicationsAPI.fetchApplications()
 
     setApplications(data)
     setInterviews(

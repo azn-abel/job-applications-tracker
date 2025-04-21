@@ -14,7 +14,7 @@ import dayjs from 'dayjs'
 import utc from 'dayjs/plugin/utc'
 import timezone from 'dayjs/plugin/timezone'
 
-import localStorageAPI from '../../../api/applications'
+import ApplicationsAPI from '../../../api/applications'
 
 import { uniqueJobTitlesAtom, uniqueCompaniesAtom } from '../../../state'
 import { useAtom } from 'jotai'
@@ -85,7 +85,7 @@ export default function EditApplicationModal({
     setFetching(true)
     let result
     if (application)
-      result = localStorageAPI.putApplication(application?.id, body)
+      result = ApplicationsAPI.putApplication(application?.id, body)
     setFetching(false)
     if (!result) {
       // TODO: something went wrong
@@ -97,7 +97,7 @@ export default function EditApplicationModal({
 
   const removeApplication = async () => {
     setFetching(true)
-    application && localStorageAPI.deleteApplication(application?.id)
+    application && ApplicationsAPI.deleteApplication(application?.id)
     setFetching(false)
 
     close()

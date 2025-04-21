@@ -1,6 +1,6 @@
 import { Application, ApplicationDTO, DateString } from '../types/applications'
 
-const localStorageAPI = {
+const ApplicationsAPI = {
   key: 'applications',
 
   fetchApplications(): Application[] {
@@ -63,4 +63,4 @@ function validateApplication(application: ApplicationDTO): Application | null {
   return newApp
 }
 
-export default localStorageAPI
+export default ApplicationsAPI

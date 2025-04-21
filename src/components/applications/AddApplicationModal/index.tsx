@@ -11,7 +11,7 @@ import {
 } from '@mantine/core'
 import { DateInput } from '@mantine/dates'
 import { isNotEmpty, useForm } from '@mantine/form'
-import localStorageAPI from '../../../api/applications'
+import ApplicationsAPI from '../../../api/applications'
 import { useEffect, useState } from 'react'
 import dayjs from 'dayjs'
 
@@ -71,7 +71,7 @@ export default function AddApplicationModal({
       body.status = 'Interview'
 
     setFetching(true)
-    const result = localStorageAPI.postApplication(body)
+    const result = ApplicationsAPI.postApplication(body)
     setFetching(false)
     if (!result) {
       //something went wrong

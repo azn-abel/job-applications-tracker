@@ -3,7 +3,7 @@ import { useState } from 'react'
 import { Modal, Button } from '@mantine/core'
 import { FileButton, Group, Text, Flex } from '@mantine/core'
 import { importCSV } from '../../../api/io'
-import localStorageAPI from '../../../api/applications'
+import ApplicationsAPI from '../../../api/applications'
 
 export default function ImportApplicationsModal({
   callback,
@@ -25,7 +25,7 @@ export default function ImportApplicationsModal({
     try {
       const results = await importCSV(file)
       for (let result of results) {
-        localStorageAPI.postApplication(result)
+        ApplicationsAPI.postApplication(result)
       }
       onClose()
       callback()
