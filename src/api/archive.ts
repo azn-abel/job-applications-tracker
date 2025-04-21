@@ -13,7 +13,7 @@ const ArchiveAPI = {
 
   fetchCollection(name: string | null) {
     if (!name) {
-      throw Error('no name provided')
+      throw Error('No name provided')
     }
     const archives = this.fetchArchive()
     if (name === 'All') {
@@ -22,25 +22,25 @@ const ArchiveAPI = {
         []
       )
     }
-    if (!archives[name]) throw Error('no archive found with name ' + name)
+    if (!archives[name]) throw Error('No archive found with name ' + name)
     return archives[name]
   },
 
   archiveCollection(name: string) {
     if (!name || name.trim() === '')
-      throw Error('archive name cannot be empty or whitespace')
+      throw Error('Archive name cannot be empty or whitespace')
     if (name.length > 50)
-      throw Error('archive name cannot be longer than 50 characters')
+      throw Error('Archive name cannot be longer than 50 characters')
     if (!/^[a-zA-Z0-9 ]+$/.test(name))
       throw Error(
-        'archive name can only contain alphanumeric characters and spaces'
+        'Archive name can only contain alphanumeric characters and spaces'
       )
 
     const applications = ApplicationsAPI.fetchApplications()
     const archives = this.fetchArchive()
 
     if (archives[name])
-      throw Error('archive with name ' + name + ' already exists')
+      throw Error('Archive with name ' + name + ' already exists')
 
     archives[name] = applications
 
@@ -51,7 +51,7 @@ const ArchiveAPI = {
   deleteCollection(name: string) {
     const archives = this.fetchArchive()
 
-    if (!archives[name]) throw Error('no archive found with name ' + name)
+    if (!archives[name]) throw Error('No archive found with name ' + name)
 
     delete archives[name]
 
@@ -61,9 +61,9 @@ const ArchiveAPI = {
   renameArchive(oldName: string, newName: string) {
     const archives = this.fetchArchive()
 
-    if (!archives[oldName]) throw Error('no archive found with name ' + oldName)
+    if (!archives[oldName]) throw Error('No archive found with name ' + oldName)
     if (archives[newName] && newName !== oldName)
-      throw Error('archive with name ' + newName + ' already exists')
+      throw Error('Archive with name ' + newName + ' already exists')
 
     const data = JSON.parse(JSON.stringify(archives[oldName]))
     delete archives[oldName]
@@ -76,7 +76,7 @@ const ArchiveAPI = {
     if (!name) throw Error('no name provided')
     const collection = this.fetchCollection(name)
 
-    if (!collection) throw Error('no archive found with name ' + name)
+    if (!collection) throw Error('No archive found with name ' + name)
 
     downloadCSV(collection, `Archived Job Applications - ${name}.csv`)
   },

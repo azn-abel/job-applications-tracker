@@ -128,10 +128,7 @@ export default function Archive() {
             >
               {smallScreen ? <IconFileExport /> : 'Export CSV'}
             </Button>
-            <Button
-              color="red"
-              onClick={() => ArchiveAPI.downloadCollection(selectedCollection)}
-            >
+            <Button color="red">
               {smallScreen ? <IconTrash /> : 'Delete'}
             </Button>
           </Flex>

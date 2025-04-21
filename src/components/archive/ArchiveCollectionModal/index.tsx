@@ -41,7 +41,7 @@ export default function ArchiveCollectionModal({
     <>
       <Modal
         opened={opened}
-        onClose={close}
+        onClose={onClose}
         title="Archive Applications"
         centered
         removeScrollProps={{
@@ -63,11 +63,15 @@ export default function ArchiveCollectionModal({
             Are you sure you want to archive {rows.length} application
             {conditionalS(rows.length)}?
           </Text>
-          {error && <Text>{error}</Text>}
+          {error && (
+            <Text size="xs" c="red">
+              {error}
+            </Text>
+          )}
         </Flex>
 
         <Flex justify="flex-end" mt={16} gap={12}>
-          <Button variant="default" onClick={close}>
+          <Button variant="default" onClick={onClose}>
             Back
           </Button>
           <Button color="red" onClick={archiveCollection}>
