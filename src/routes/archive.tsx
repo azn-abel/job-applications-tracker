@@ -258,7 +258,7 @@ function ApplicationsTable({
         <Table.Td>{application.interviewDate}</Table.Td>
 
         {showTags && (
-          <Table.Td maw={96}>{application.tags.join(', ')}</Table.Td>
+          <Table.Td maw={96}>{application.tags?.join(', ') || ''}</Table.Td>
         )}
       </Table.Tr>
     )
