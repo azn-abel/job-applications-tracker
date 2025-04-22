@@ -25,6 +25,17 @@ export type Application = {
   jobDescription: string
 }
 
+export const ApplicationKeys: (keyof Application)[] = [
+  'id',
+  'jobTitle',
+  'company',
+  'status',
+  'tags',
+  'applicationDate',
+  'interviewDate',
+  'jobDescription',
+]
+
 export type ApplicationDTO = {
   id?: string
   jobTitle: string

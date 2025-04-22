@@ -1,7 +1,6 @@
-import Papa, { ParseResult, ParseStepResult } from 'papaparse'
+import Papa, { ParseStepResult } from 'papaparse'
 import ApplicationsAPI from './applications'
-import { Application } from '../types/applications'
-import { AppShellProps } from '@mantine/core'
+import { Application, ApplicationKeys } from '../types/applications'
 
 export function downloadCSV(
   data: Application[],
@@ -9,9 +8,7 @@ export function downloadCSV(
 ) {
   if (!data.length) return
 
-  const headers: (keyof Application)[] = Object.keys(
-    data[0]
-  ) as (keyof Application)[]
+  const headers: (keyof Application)[] = ApplicationKeys
 
   const encoder = new TextEncoder()
   const stream = new ReadableStream({
@@ -25,11 +22,12 @@ export function downloadCSV(
       for (const obj of data) {
         if (!obj.interviewDate) obj.interviewDate = ''
         if (!obj.applicationDate) obj.applicationDate = ''
-        const row = headers.map((key: keyof Application) =>
-          escape(
+        const row = headers.map((key: keyof Application) => {
+          if (key === 'tags' && !obj[key]) obj[key] = []
+          return escape(
             typeof obj[key] === 'string' ? obj[key] : JSON.stringify(obj[key])
           )
-        )
+        })
         controller.enqueue(encoder.encode(row.join(',') + '\n'))
       }
 
