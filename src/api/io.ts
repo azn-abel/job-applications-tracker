@@ -25,7 +25,9 @@ export function downloadCSV(
       for (const obj of data) {
         if (!obj.interviewDate) obj.interviewDate = ''
         if (!obj.applicationDate) obj.applicationDate = ''
-        const row = headers.map((key: keyof Application) => escape(obj[key]))
+        const row = headers.map((key: keyof Application) =>
+          escape(JSON.stringify(obj[key]))
+        )
         controller.enqueue(encoder.encode(row.join(',') + '\n'))
       }
 
@@ -49,8 +51,15 @@ export function importCSV(file: File): Promise<Application[]> {
   const ids = ApplicationsAPI.fetchApplications().map((row) => row.id)
   const results: Application[] = []
   const handleResult = (result: ParseStepResult<Application>) => {
-    if (!result.data.interviewDate) result.data.interviewDate = ''
-    if (!ids.includes(result.data.id)) results.push(result.data)
+    const formatted: any = {}
+
+    for (const key of Object.keys(result.data) as (keyof Application)[]) {
+      // @ts-ignore
+      formatted[key] = JSON.parse(result.data[key])
+    }
+
+    if (!formatted.interviewDate) formatted.interviewDate = ''
+    if (!ids.includes(formatted.id)) results.push(formatted)
   }
   return new Promise((resolve, reject) => {
     Papa.parse(file, {

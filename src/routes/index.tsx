@@ -15,6 +15,7 @@ import {
   Group,
   Table,
   Button,
+  Switch,
 } from '@mantine/core'
 import cx from 'clsx'
 import {
@@ -35,12 +36,16 @@ import ApplicationsAPI from '../api/applications'
 
 import { useDisclosure, useMediaQuery } from '@mantine/hooks'
 
-import { useAtom } from 'jotai'
+import { atom, useAtom } from 'jotai'
 import { rowsAtom, selectedRowsAtom } from '../state'
 import { downloadCSV } from '../api/io'
 import { conditionalS } from '../utils'
 
-import { Application, ApplicationDTO } from '../types/applications'
+import {
+  Application,
+  ApplicationDTO,
+  FilterableApplication,
+} from '../types/applications'
 
 import { ReactNode } from 'react'
 import { animationProps } from '../state/constants'
@@ -48,10 +53,18 @@ import { animationProps } from '../state/constants'
 import { MotionContainer } from '../state/constants'
 
 import ArchiveCollectionModal from '../components/archive/ArchiveCollectionModal'
+import CustomPillsInput from '../components/global/CustomPillsInput'
+
+const homeTagsAtom = atom<string[]>([])
+const showHomeTagsAtom = atom<boolean>(false)
 
 function Home() {
   const [applications, setApplications] = useAtom(rowsAtom)
   const [selectedRows] = useAtom(selectedRowsAtom)
+
+  const [tags, setTags] = useAtom(homeTagsAtom)
+  const [showTags, setShowTags] = useAtom(showHomeTagsAtom)
+
   const numInterviews = applications.filter((app) =>
     ['Interview', 'Offer'].includes(app.status)
   ).length
@@ -115,7 +128,7 @@ function Home() {
           </Grid.Col>
         </Grid>
         <Flex justify="space-between" wrap="wrap" gap={12}>
-          <Flex gap={12}>
+          <Flex gap={12} align="center">
             <Title order={2}>Applications</Title>
           </Flex>
           <Flex gap={12}>
@@ -132,6 +145,13 @@ function Home() {
               </>
             )}
           </Flex>
+        </Flex>
+        <Flex mt={12} gap={12} align="center">
+          <Switch
+            label="Show Tags"
+            onChange={(event) => setShowTags(event.currentTarget.checked)}
+          />
+          <CustomPillsInput tags={tags} setTags={setTags}></CustomPillsInput>
         </Flex>
         <Card
           mt={24}
@@ -162,8 +182,11 @@ function ApplicationsTable({
 
   const [search, setSearch] = useState('')
   const [sortedApplications, setSortedApplications] = useState(applications)
-  const [sortBy, setSortBy] = useState<keyof ApplicationDTO | null>(null)
+  const [sortBy, setSortBy] = useState<keyof FilterableApplication | null>(null)
   const [reverseSortDirection, setReverseSortDirection] = useState(false)
+
+  const [tags, setTags] = useAtom(homeTagsAtom)
+  const [showTags, setShowTags] = useAtom(showHomeTagsAtom)
 
   const [selectedApplication, setSelectedApplication] =
     useState<Application | null>(null)
@@ -187,12 +210,23 @@ function ApplicationsTable({
     setSortedApplications(applications)
   }, [applications])
 
-  const setSorting = (field: keyof Application) => {
+  useEffect(() => {
+    setSortedApplications(
+      sortData(applications, {
+        sortBy,
+        reversed: reverseSortDirection,
+        search,
+        tags,
+      })
+    )
+  }, [tags])
+
+  const setSorting = (field: keyof FilterableApplication) => {
     const reversed = field === sortBy ? !reverseSortDirection : false
     setReverseSortDirection(reversed)
     setSortBy(field)
     setSortedApplications(
-      sortData(applications, { sortBy: field, reversed, search })
+      sortData(applications, { sortBy: field, reversed, search, tags })
     )
   }
 
@@ -204,6 +238,7 @@ function ApplicationsTable({
         sortBy,
         reversed: reverseSortDirection,
         search: value,
+        tags,
       })
     )
   }
@@ -234,6 +269,10 @@ function ApplicationsTable({
         <Table.Td>{application.status}</Table.Td>
         <Table.Td>{application.applicationDate}</Table.Td>
         <Table.Td>{application.interviewDate}</Table.Td>
+
+        {showTags && (
+          <Table.Td maw={96}>{application.tags.join(', ')}</Table.Td>
+        )}
       </Table.Tr>
     )
   })
@@ -293,15 +332,16 @@ function ApplicationsTable({
               reversed={reverseSortDirection}
               onSort={() => setSorting('applicationDate')}
             >
-              Application Date
+              Applied
             </Th>
             <Th
               sorted={sortBy === 'interviewDate'}
               reversed={reverseSortDirection}
               onSort={() => setSorting('interviewDate')}
             >
-              Interview Date
+              Interview
             </Th>
+            {showTags && <Table.Th maw={96}>Tags</Table.Th>}
           </Table.Tr>
         </Table.Thead>
         <Table.Tbody>{sortedRows}</Table.Tbody>
@@ -342,11 +382,17 @@ function Th({
   )
 }
 
-function filterData(data: Application[], search: string) {
+function filterData(data: Application[], search: string, tags: string[]) {
   const query = search.toLowerCase().trim()
-  return data.filter((item) =>
-    keys(data[0]).some((key) => item[key]?.toLowerCase().includes(query))
-  )
+  return data.filter((item: any) => {
+    const itemTags: string[] = item.tags
+    return (
+      keys(data[0]).some((key) =>
+        JSON.stringify(item[key])?.toLowerCase().includes(query)
+      ) &&
+      (tags.length === 0 || tags.every((tag) => itemTags.includes(tag)))
+    )
+  })
 }
 
 function sortData(
@@ -355,10 +401,16 @@ function sortData(
     sortBy,
     reversed,
     search,
-  }: { sortBy: keyof ApplicationDTO | null; reversed: Boolean; search: string }
+    tags,
+  }: {
+    sortBy: keyof FilterableApplication | null
+    reversed: Boolean
+    search: string
+    tags: string[]
+  }
 ) {
   if (!sortBy) {
-    return filterData(data, search)
+    return filterData(data, search, tags)
   }
 
   return filterData(
@@ -372,7 +424,8 @@ function sortData(
 
       return a[sortBy].localeCompare(b[sortBy])
     }),
-    search
+    search,
+    tags
   )
 }
 

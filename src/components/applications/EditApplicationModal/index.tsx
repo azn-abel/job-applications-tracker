@@ -30,6 +30,8 @@ import {
   DateString,
 } from '../../../types/applications'
 
+import CustomPillsInput from '../../global/CustomPillsInput'
+
 dayjs.extend(utc)
 dayjs.extend(timezone)
 
@@ -49,12 +51,15 @@ export default function EditApplicationModal({
   const [uniqueJobTitles] = useAtom(uniqueJobTitlesAtom)
   const [uniqueCompanies] = useAtom(uniqueCompaniesAtom)
 
+  const [tags, setTags] = useState<string[]>([])
+
   const form = useForm<ApplicationInput>({
     mode: 'uncontrolled',
     initialValues: {
       jobTitle: '',
       company: '',
       status: 'New',
+      tags: [],
       applicationDate: null,
       interviewDate: null,
       jobDescription: '',
@@ -77,6 +82,7 @@ export default function EditApplicationModal({
       ...values,
       applicationDate: formatDate(values.applicationDate!) || '',
       interviewDate: formatDate(values.interviewDate!) || '',
+      tags,
     }
 
     if (body.interviewDate && ['New', 'Assessment'].includes(body.status))
@@ -110,11 +116,13 @@ export default function EditApplicationModal({
       company: application?.company || '',
       status: application?.status || 'New',
       jobDescription: application?.jobDescription || '',
+      tags: application?.tags,
       applicationDate: dayjs(application?.applicationDate).toDate(),
       interviewDate: application?.interviewDate
         ? dayjs(application.interviewDate).toDate()
         : null,
     })
+    setTags(application?.tags || [])
   }, [application])
 
   return (
@@ -191,6 +199,7 @@ export default function EditApplicationModal({
             key={form.key('interviewDate')}
             {...form.getInputProps('interviewDate')}
           />
+          <CustomPillsInput tags={tags} setTags={setTags} showLabel />
           <Textarea
             label="Job Description"
             placeholder="Job Description"

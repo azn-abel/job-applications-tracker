@@ -4,7 +4,7 @@ import ArchiveAPI from '../../../api/archive'
 
 import { useState } from 'react'
 
-import { rowsAtom } from '../../../state'
+import { rowsAtom, selectedRowsAtom } from '../../../state'
 import { useAtom } from 'jotai'
 import { conditionalS } from '../../../utils'
 
@@ -17,12 +17,12 @@ export default function ArchiveCollectionModal({
   const [name, setName] = useState('')
   const [error, setError] = useState('')
 
-  const [rows] = useAtom(rowsAtom)
+  const [rows] = useAtom(selectedRowsAtom)
 
   const archiveCollection = async () => {
     setError('')
     try {
-      ArchiveAPI.archiveCollection(name)
+      ArchiveAPI.archiveApplications(rows)
       close()
       callback()
       setName('')
@@ -50,14 +50,9 @@ export default function ArchiveCollectionModal({
         size="md"
       >
         <Flex direction="column" gap={12}>
-          <TextInput
-            label="Name the collection"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-          />
           <Text>
-            This action will archive your current season of applications.
-            Archived applications cannot be edited or un-archived.{' '}
+            This action will archive the selected applications and cannot be
+            undone.
           </Text>
           <Text>
             Are you sure you want to archive {rows.length} application
@@ -80,7 +75,9 @@ export default function ArchiveCollectionModal({
         </Flex>
       </Modal>
 
-      <Button onClick={open}>Archive</Button>
+      <Button disabled={rows.length === 0} onClick={open}>
+        Archive
+      </Button>
     </>
   )
 }

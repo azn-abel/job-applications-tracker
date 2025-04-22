@@ -41,17 +41,19 @@ function validateApplication(application: ApplicationDTO): Application | null {
     !application.jobTitle ||
     !application.company ||
     !application.status ||
-    !application.applicationDate
+    !application.applicationDate ||
+    !application.tags
   )
     return null
 
-  const { jobTitle, company, status, applicationDate } = application
+  const { jobTitle, company, status, applicationDate, tags } = application
 
   const newApp = {
     id: application.id || crypto.randomUUID(),
     jobTitle,
     company,
     status,
+    tags,
     applicationDate,
     interviewDate: application.interviewDate || ('' as DateString),
     jobDescription:

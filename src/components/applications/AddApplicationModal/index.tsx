@@ -16,7 +16,7 @@ import { useEffect, useState } from 'react'
 import dayjs from 'dayjs'
 
 import { uniqueJobTitlesAtom, uniqueCompaniesAtom } from '../../../state'
-import { useAtom } from 'jotai'
+import { atom, useAtom } from 'jotai'
 
 import { validApplicationStates } from '../../../state/constants'
 
@@ -26,6 +26,8 @@ import {
   ApplicationInput,
   DateString,
 } from '../../../types/applications'
+
+import CustomPillsInput from '../../global/CustomPillsInput'
 
 export default function AddApplicationModal({
   callback,
@@ -38,12 +40,15 @@ export default function AddApplicationModal({
   const [uniqueJobTitles] = useAtom(uniqueJobTitlesAtom)
   const [uniqueCompanies] = useAtom(uniqueCompaniesAtom)
 
+  const [tags, setTags] = useState<string[]>([])
+
   const form = useForm<ApplicationInput>({
     mode: 'uncontrolled',
     initialValues: {
       jobTitle: '',
       company: '',
       status: 'New',
+      tags: [],
       applicationDate: null,
       interviewDate: null,
       jobDescription: '',
@@ -65,7 +70,10 @@ export default function AddApplicationModal({
       ...values,
       applicationDate: formatDate(values.applicationDate) || '',
       interviewDate: formatDate(values.interviewDate) || '',
+      tags: tags,
     }
+
+    console.log(body)
 
     if (body.interviewDate && ['New', 'Assessment'].includes(body.status))
       body.status = 'Interview'
@@ -168,6 +176,7 @@ export default function AddApplicationModal({
             key={form.key('interviewDate')}
             {...form.getInputProps('interviewDate')}
           />
+          <CustomPillsInput tags={tags} setTags={setTags} />
           <Textarea
             label="Job Description"
             placeholder="Job Description"

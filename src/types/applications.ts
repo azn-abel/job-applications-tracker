@@ -19,6 +19,7 @@ export type Application = {
   jobTitle: string
   company: string
   status: ApplicationStatus
+  tags: string[]
   applicationDate: DateString
   interviewDate: DateString
   jobDescription: string
@@ -29,6 +30,7 @@ export type ApplicationDTO = {
   jobTitle: string
   company: string
   status: ApplicationStatus
+  tags: string[]
   applicationDate: DateString
   interviewDate?: DateString
   jobDescription?: string
@@ -39,7 +41,18 @@ export type ApplicationInput = {
   jobTitle: string
   company: string
   status: ApplicationStatus
+  tags: string[]
   applicationDate: Date | null
   interviewDate?: Date | null
   jobDescription?: string
+}
+
+export type FilterableApplication = {
+  id: string
+  jobTitle: string
+  company: string
+  status: ApplicationStatus
+  applicationDate: DateString
+  interviewDate: DateString
+  jobDescription: string
 }

@@ -1,49 +1,71 @@
 import { useState, useEffect, ChangeEvent } from 'react'
 import {
+  Container,
   Title,
   Card,
   Grid,
   Text,
   TextInput,
   Flex,
+  LoadingOverlay,
   UnstyledButton,
   Center,
   keys,
+  Checkbox,
   Group,
   Table,
   Button,
-  Select,
+  Switch,
 } from '@mantine/core'
+import cx from 'clsx'
 import {
   IconChevronDown,
   IconChevronUp,
   IconSearch,
   IconSelector,
-  IconFileExport,
-  IconTrash,
 } from '@tabler/icons-react'
 
+import AddApplicationModal from '../components/applications/AddApplicationModal'
 import EditApplicationModal from '../components/applications/EditApplicationModal'
+import DeleteSelectedApplicationModal from '../components/applications/DeleteSelectedApplicationsModal'
+import ImportApplicationsModal from '../components/applications/ImportApplicationsModal'
 
 import classes from './Index.module.css'
 
-import { useDisclosure, useMediaQuery } from '@mantine/hooks'
-
-import { conditionalS } from '../utils'
-
-import { Application, ApplicationDTO } from '../types/applications'
-
-import { ReactNode } from 'react'
-
-import { MotionContainer, animationProps } from '../state/constants'
+import ApplicationsAPI from '../api/applications'
 import ArchiveAPI from '../api/archive'
 
-export default function Archive() {
-  const [applications, setApplications] = useState<Application[]>([])
-  const collections = ['All', ...Object.keys(ArchiveAPI.fetchArchive())]
-  const [selectedCollection, setSelectedCollection] = useState<string | null>(
-    'All'
-  )
+import { useDisclosure, useMediaQuery } from '@mantine/hooks'
+
+import { atom, useAtom } from 'jotai'
+import { rowsAtom, selectedArchiveRowsAtom } from '../state'
+import { downloadCSV } from '../api/io'
+import { conditionalS } from '../utils'
+
+import {
+  Application,
+  ApplicationDTO,
+  FilterableApplication,
+} from '../types/applications'
+
+import { ReactNode } from 'react'
+import { animationProps } from '../state/constants'
+
+import { MotionContainer } from '../state/constants'
+
+import ArchiveCollectionModal from '../components/archive/ArchiveCollectionModal'
+import CustomPillsInput from '../components/global/CustomPillsInput'
+
+const archiveTagsAtom = atom<string[]>([])
+const showArchiveTagsAtom = atom<boolean>(false)
+
+function Home() {
+  const [applications, setApplications] = useAtom(rowsAtom)
+  const [selectedRows] = useAtom(selectedArchiveRowsAtom)
+
+  const [tags, setTags] = useAtom(archiveTagsAtom)
+  const [showTags, setShowTags] = useAtom(showArchiveTagsAtom)
+
   const numInterviews = applications.filter((app) =>
     ['Interview', 'Offer'].includes(app.status)
   ).length
@@ -52,7 +74,7 @@ export default function Archive() {
   const smallScreen = useMediaQuery('(max-width: 512px)')
 
   const fillApplications = async () => {
-    const response = ArchiveAPI.fetchCollection(selectedCollection)
+    const response = ArchiveAPI.fetchArchive()
     if (!response) {
       // something went wrong
       return
@@ -60,27 +82,24 @@ export default function Archive() {
     setApplications(response)
   }
 
-  useEffect(() => {}, [])
+  const exportCSV = () => {
+    downloadCSV(
+      applications.filter((row) => {
+        if (!row.id) return false
+        return selectedRows.includes(row.id)
+      })
+    )
+  }
 
   useEffect(() => {
-    if (!selectedCollection) {
-      setSelectedCollection('All')
-      return
-    }
     fillApplications()
-  }, [selectedCollection])
+  }, [])
 
   return (
     <>
       <MotionContainer {...animationProps} pos="relative">
         <Flex justify="space-between" align="center" wrap="wrap">
           <Title>Archive</Title>
-          <Select
-            data={collections}
-            value={selectedCollection}
-            onChange={(value) => setSelectedCollection(value)}
-            defaultValue="All"
-          />
         </Flex>
         <Grid mt={24} mb={24}>
           <Grid.Col span={4}>
@@ -93,13 +112,7 @@ export default function Archive() {
           </Grid.Col>
           <Grid.Col span={4}>
             <Card shadow="md" radius={8}>
-              <Title order={2}>
-                {applications?.filter(
-                  (ele) =>
-                    ['Interview', 'Offer'].includes(ele.status) ||
-                    ele.interviewDate
-                ).length || 0}
-              </Title>
+              <Title order={2}>{numInterviews || 0}</Title>
               <Text size={smallScreen ? 'xs' : 'md'}>
                 Interview{conditionalS(numInterviews)}
               </Text>
@@ -107,10 +120,7 @@ export default function Archive() {
           </Grid.Col>
           <Grid.Col span={4}>
             <Card shadow="md" radius={8}>
-              <Title order={2}>
-                {applications?.filter((ele) => ele.status === 'Offer').length ||
-                  0}
-              </Title>
+              <Title order={2}>{numOffers || 0}</Title>
               <Text size={smallScreen ? 'xs' : 'md'}>
                 Offer{conditionalS(numOffers)}
               </Text>
@@ -118,20 +128,24 @@ export default function Archive() {
           </Grid.Col>
         </Grid>
         <Flex justify="space-between" wrap="wrap" gap={12}>
-          <Flex gap={12}>
+          <Flex gap={12} align="center">
             <Title order={2}>Applications</Title>
           </Flex>
-          <Flex gap={12} align="center">
-            <Button
-              variant="default"
-              onClick={() => ArchiveAPI.downloadCollection(selectedCollection)}
-            >
-              {smallScreen ? <IconFileExport /> : 'Export CSV'}
-            </Button>
-            <Button color="red">
-              {smallScreen ? <IconTrash /> : 'Delete'}
-            </Button>
+          <Flex gap={12}>
+            {selectedRows?.length > 0 && (
+              <>
+                <DeleteSelectedApplicationModal callback={fillApplications} />
+                <Button onClick={exportCSV}>Export</Button>
+              </>
+            )}
           </Flex>
+        </Flex>
+        <Flex mt={12} gap={12} align="center">
+          <Switch
+            label="Show Tags"
+            onChange={(event) => setShowTags(event.currentTarget.checked)}
+          />
+          <CustomPillsInput tags={tags} setTags={setTags}></CustomPillsInput>
         </Flex>
         <Card
           mt={24}
@@ -162,22 +176,51 @@ function ApplicationsTable({
 
   const [search, setSearch] = useState('')
   const [sortedApplications, setSortedApplications] = useState(applications)
-  const [sortBy, setSortBy] = useState<keyof ApplicationDTO | null>(null)
+  const [sortBy, setSortBy] = useState<keyof FilterableApplication | null>(null)
   const [reverseSortDirection, setReverseSortDirection] = useState(false)
+
+  const [tags, setTags] = useAtom(archiveTagsAtom)
+  const [showTags, setShowTags] = useAtom(showArchiveTagsAtom)
 
   const [selectedApplication, setSelectedApplication] =
     useState<Application | null>(null)
+
+  const [selection, setSelection] = useAtom(selectedArchiveRowsAtom)
+
+  const toggleRow = (id: string) =>
+    setSelection((current) =>
+      current.includes(id)
+        ? current.filter((item) => item !== id)
+        : [...current, id]
+    )
+  const toggleAll = () =>
+    setSelection((current) =>
+      current.length === applications.length
+        ? []
+        : applications.map((item) => item.id as string)
+    )
 
   useEffect(() => {
     setSortedApplications(applications)
   }, [applications])
 
-  const setSorting = (field: keyof Application) => {
+  useEffect(() => {
+    setSortedApplications(
+      sortData(applications, {
+        sortBy,
+        reversed: reverseSortDirection,
+        search,
+        tags,
+      })
+    )
+  }, [tags])
+
+  const setSorting = (field: keyof FilterableApplication) => {
     const reversed = field === sortBy ? !reverseSortDirection : false
     setReverseSortDirection(reversed)
     setSortBy(field)
     setSortedApplications(
-      sortData(applications, { sortBy: field, reversed, search })
+      sortData(applications, { sortBy: field, reversed, search, tags })
     )
   }
 
@@ -189,11 +232,13 @@ function ApplicationsTable({
         sortBy,
         reversed: reverseSortDirection,
         search: value,
+        tags,
       })
     )
   }
 
   const sortedRows = sortedApplications.map((application, index) => {
+    const selected = selection.includes(application.id as string)
     return (
       <Table.Tr
         key={index}
@@ -202,12 +247,26 @@ function ApplicationsTable({
           open()
         }}
         style={{ cursor: 'pointer' }}
+        className={cx({ [classes.rowSelected]: selected })}
       >
+        <Table.Td>
+          <Checkbox
+            checked={selection.includes(application.id)}
+            onChange={() => {
+              toggleRow(application.id)
+              close()
+            }}
+          />
+        </Table.Td>
         <Table.Td>{application.jobTitle}</Table.Td>
         <Table.Td>{application.company}</Table.Td>
         <Table.Td>{application.status}</Table.Td>
         <Table.Td>{application.applicationDate}</Table.Td>
         <Table.Td>{application.interviewDate}</Table.Td>
+
+        {showTags && (
+          <Table.Td maw={96}>{application.tags.join(', ')}</Table.Td>
+        )}
       </Table.Tr>
     )
   })
@@ -231,6 +290,16 @@ function ApplicationsTable({
       <Table highlightOnHover>
         <Table.Thead>
           <Table.Tr>
+            <Table.Th w={40}>
+              <Checkbox
+                onChange={toggleAll}
+                checked={selection.length === applications?.length}
+                indeterminate={
+                  selection.length > 0 &&
+                  selection.length !== applications?.length
+                }
+              />
+            </Table.Th>
             <Th
               sorted={sortBy === 'jobTitle'}
               reversed={reverseSortDirection}
@@ -257,15 +326,16 @@ function ApplicationsTable({
               reversed={reverseSortDirection}
               onSort={() => setSorting('applicationDate')}
             >
-              Application Date
+              Applied
             </Th>
             <Th
               sorted={sortBy === 'interviewDate'}
               reversed={reverseSortDirection}
               onSort={() => setSorting('interviewDate')}
             >
-              Interview Date
+              Interview
             </Th>
+            {showTags && <Table.Th maw={96}>Tags</Table.Th>}
           </Table.Tr>
         </Table.Thead>
         <Table.Tbody>{sortedRows}</Table.Tbody>
@@ -306,11 +376,17 @@ function Th({
   )
 }
 
-function filterData(data: Application[], search: string) {
+function filterData(data: Application[], search: string, tags: string[]) {
   const query = search.toLowerCase().trim()
-  return data.filter((item) =>
-    keys(data[0]).some((key) => item[key]?.toLowerCase().includes(query))
-  )
+  return data.filter((item: any) => {
+    const itemTags: string[] = item.tags
+    return (
+      keys(data[0]).some((key) =>
+        JSON.stringify(item[key])?.toLowerCase().includes(query)
+      ) &&
+      (tags.length === 0 || tags.every((tag) => itemTags.includes(tag)))
+    )
+  })
 }
 
 function sortData(
@@ -319,10 +395,16 @@ function sortData(
     sortBy,
     reversed,
     search,
-  }: { sortBy: keyof ApplicationDTO | null; reversed: Boolean; search: string }
+    tags,
+  }: {
+    sortBy: keyof FilterableApplication | null
+    reversed: Boolean
+    search: string
+    tags: string[]
+  }
 ) {
   if (!sortBy) {
-    return filterData(data, search)
+    return filterData(data, search, tags)
   }
 
   return filterData(
@@ -336,6 +418,9 @@ function sortData(
 
       return a[sortBy].localeCompare(b[sortBy])
     }),
-    search
+    search,
+    tags
   )
 }
+
+export default Home

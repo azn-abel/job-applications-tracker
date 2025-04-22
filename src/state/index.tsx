@@ -4,6 +4,8 @@ import { atom } from 'jotai'
 
 export const selectedRowsAtom = atom<string[]>([])
 
+export const selectedArchiveRowsAtom = atom<string[]>([])
+
 export const rowsAtom = atom<Application[]>([])
 
 export const uniqueJobTitlesAtom = atom((get) => [
