@@ -383,9 +383,11 @@ function filterData(data: Application[], search: string, tags: string[]) {
     const itemTags: string[] = item.tags
     return (
       keys(data[0]).some((key) =>
-        JSON.stringify(item[key])?.toLowerCase().includes(query)
+        JSON.stringify(item[key] || '')
+          ?.toLowerCase()
+          .includes(query)
       ) &&
-      (tags.length === 0 || tags.every((tag) => itemTags.includes(tag)))
+      (tags.length === 0 || tags.every((tag) => itemTags?.includes(tag)))
     )
   })
 }
