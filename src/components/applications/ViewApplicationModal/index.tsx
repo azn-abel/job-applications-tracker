@@ -1,25 +1,29 @@
-import { useDisclosure } from '@mantine/hooks'
 import {
   Modal,
   Button,
   Flex,
-  Autocomplete,
+  Select,
   Textarea,
   LoadingOverlay,
+  Autocomplete,
 } from '@mantine/core'
 import { DateInput } from '@mantine/dates'
 import { isNotEmpty, useForm } from '@mantine/form'
-import ApplicationsAPI from '../../../api/applications'
-import { useEffect, useState } from 'react'
 import dayjs from 'dayjs'
+import utc from 'dayjs/plugin/utc'
+import timezone from 'dayjs/plugin/timezone'
+
+import ApplicationsAPI from '../../../api/applications'
 
 import { uniqueJobTitlesAtom, uniqueCompaniesAtom } from '../../../state'
 import { useAtom } from 'jotai'
 
 import { validApplicationStates } from '../../../state/constants'
-
 import { handleStatusDropdownClose } from '../util'
+
+import { useState, useEffect } from 'react'
 import {
+  Application,
   ApplicationDTO,
   ApplicationInput,
   DateString,
@@ -27,14 +31,22 @@ import {
 
 import CustomPillsInput from '../../global/CustomPillsInput'
 
-export default function AddApplicationModal({
+dayjs.extend(utc)
+dayjs.extend(timezone)
+
+export default function EditApplicationModal({
+  opened,
+  open,
+  close,
+  application,
   callback,
 }: {
+  opened: boolean
+  open: () => void
+  close: () => void
+  application: Application | null
   callback: () => void
 }) {
-  const [opened, { open, close }] = useDisclosure(false)
-  const [fetching, setFetching] = useState(false)
-
   const [uniqueJobTitles] = useAtom(uniqueJobTitlesAtom)
   const [uniqueCompanies] = useAtom(uniqueCompaniesAtom)
 
@@ -54,56 +66,70 @@ export default function AddApplicationModal({
     validate: {
       jobTitle: isNotEmpty('Required'),
       company: isNotEmpty('Required'),
-      status: (value) => {
-        return !validApplicationStates.includes(value)
+      status: (value) =>
+        !validApplicationStates.includes(value)
           ? 'Status must be one of: New, Assessment, Interview, Offer, Rejected'
-          : null
-      },
+          : null,
       applicationDate: isNotEmpty('Required'),
     },
   })
 
-  const createApplication = async (values: ApplicationInput) => {
+  const [fetching, setFetching] = useState(false)
+
+  const updateApplication = async (values: ApplicationInput) => {
     const body: ApplicationDTO = {
       ...values,
-      applicationDate: formatDate(values.applicationDate) || '',
-      interviewDate: formatDate(values.interviewDate) || '',
-      tags: tags,
+      applicationDate: formatDate(values.applicationDate!) || '',
+      interviewDate: formatDate(values.interviewDate!) || '',
+      tags,
     }
-
-    console.log(body)
 
     if (body.interviewDate && ['New', 'Assessment'].includes(body.status))
       body.status = 'Interview'
 
     setFetching(true)
-    const result = ApplicationsAPI.postApplication(body)
+    let result
+    if (application)
+      result = ApplicationsAPI.putApplication(application?.id, body)
     setFetching(false)
     if (!result) {
-      //something went wrong
-      return
+      // TODO: something went wrong
     }
+
+    close()
+    callback()
+  }
+
+  const removeApplication = async () => {
+    setFetching(true)
+    application && ApplicationsAPI.deleteApplication(application?.id)
+    setFetching(false)
+
     close()
     callback()
   }
 
   useEffect(() => {
     form.setValues({
-      jobTitle: '',
-      company: '',
-      status: 'New',
-      jobDescription: '',
-      applicationDate: null,
-      interviewDate: null,
+      jobTitle: application?.jobTitle || '',
+      company: application?.company || '',
+      status: application?.status || 'New',
+      jobDescription: application?.jobDescription || '',
+      tags: application?.tags,
+      applicationDate: dayjs(application?.applicationDate).toDate(),
+      interviewDate: application?.interviewDate
+        ? dayjs(application.interviewDate).toDate()
+        : null,
     })
-  }, [opened])
+    setTags(application?.tags || [])
+  }, [application])
 
   return (
     <>
       <Modal
         opened={opened}
         onClose={close}
-        title="Add Application"
+        title="View Application"
         removeScrollProps={{
           allowPinchZoom: true,
         }}
@@ -112,11 +138,11 @@ export default function AddApplicationModal({
       >
         <LoadingOverlay visible={fetching} zIndex={1000} />
         <form
-          onSubmit={form.onSubmit(createApplication)}
-          onKeyDown={(e: React.KeyboardEvent<HTMLFormElement>) => {
+          onSubmit={form.onSubmit(updateApplication)}
+          onKeyDown={(e) => {
             if (
               e.code === 'Enter' &&
-              (e.target as HTMLElement).tagName !== 'TEXTAREA'
+              (e.target as HTMLInputElement).tagName !== 'TEXTAREA'
             ) {
               e.preventDefault()
             }
@@ -125,10 +151,12 @@ export default function AddApplicationModal({
           <Autocomplete
             label="Job Title"
             placeholder="Job Title"
-            data={uniqueJobTitles}
             withAsterisk
+            data={uniqueJobTitles}
             key={form.key('jobTitle')}
             {...form.getInputProps('jobTitle')}
+            readOnly
+            variant="unstyled"
           />
           <Autocomplete
             label="Company"
@@ -137,15 +165,20 @@ export default function AddApplicationModal({
             withAsterisk
             key={form.key('company')}
             {...form.getInputProps('company')}
+            readOnly
+            variant="unstyled"
           />
-          <Autocomplete
+          <Select
             label="Status"
             placeholder="Status"
-            data={validApplicationStates}
+            defaultValue={application?.status}
+            data={['New', 'Assessment', 'Interview', 'Offer', 'Rejected']}
             onDropdownClose={() => handleStatusDropdownClose(form)}
             withAsterisk
             key={form.key('status')}
             {...form.getInputProps('status')}
+            readOnly
+            variant="unstyled"
           />
           <DateInput
             label="Application Date"
@@ -155,51 +188,63 @@ export default function AddApplicationModal({
             firstDayOfWeek={0}
             weekendDays={[]}
             withAsterisk
-            onTouchEnd={(e: React.TouchEvent) =>
-              ((e.target as HTMLInputElement).readOnly = true)
-            }
+            onTouchEnd={(e) => ((e.target as HTMLInputElement).readOnly = true)}
             key={form.key('applicationDate')}
             {...form.getInputProps('applicationDate')}
+            readOnly
+            variant="unstyled"
           />
           <DateInput
             label="Interview Date"
             valueFormat="YYYY-MM-DD"
-            placeholder="Choose Date"
+            placeholder="No Date Specified"
             clearable
+            preserveTime={false}
             firstDayOfWeek={0}
             weekendDays={[]}
-            onTouchEnd={(e: React.TouchEvent) =>
-              ((e.target as HTMLInputElement).readOnly = true)
-            }
+            onTouchEnd={(e) => ((e.target as HTMLInputElement).readOnly = true)}
             key={form.key('interviewDate')}
             {...form.getInputProps('interviewDate')}
+            readOnly
+            variant="unstyled"
           />
-          <CustomPillsInput tags={tags} setTags={setTags} showLabel />
+          <CustomPillsInput
+            tags={tags}
+            setTags={setTags}
+            showLabel
+            readOnly
+            unstyled
+          />
           <Textarea
             label="Job Description"
-            placeholder="Job Description"
+            placeholder="No Job Description Provided"
             rows={8}
             maxLength={20000}
-            key={form.key('jobDescroption')}
+            key={form.key('jobDescription')}
             {...form.getInputProps('jobDescription')}
+            readOnly
+            variant="unstyled"
           />
-          <Flex justify="flex-end" mt={16}>
-            <Button mr={16} color="red" onClick={close}>
-              Cancel
+          <Flex justify="space-between" mt={16}>
+            <Button
+              mr={16}
+              color="red"
+              onClick={removeApplication}
+              style={{ justifySelf: 'start' }}
+            >
+              Delete
             </Button>
-            <Button type="submit">Save</Button>
+            <Flex>
+              <Button onClick={close}>Close</Button>
+            </Flex>
           </Flex>
         </form>
       </Modal>
-
-      <Button variant="default" onClick={open}>
-        Add
-      </Button>
     </>
   )
 }
 
-function formatDate(date?: Date | null): DateString | null {
-  if (!date) return null
+function formatDate(date?: Date | DateString): DateString {
+  if (!date) return ''
   return dayjs(date).format('YYYY-MM-DD') as DateString
 }

@@ -1,13 +1,11 @@
 import { useState, useEffect, ChangeEvent } from 'react'
 import {
-  Container,
   Title,
   Card,
   Grid,
   Text,
   TextInput,
   Flex,
-  LoadingOverlay,
   UnstyledButton,
   Center,
   keys,
@@ -41,11 +39,7 @@ import { rowsAtom, selectedRowsAtom } from '../state'
 import { downloadCSV } from '../api/io'
 import { conditionalS } from '../utils'
 
-import {
-  Application,
-  ApplicationDTO,
-  FilterableApplication,
-} from '../types/applications'
+import { Application, FilterableApplication } from '../types/applications'
 
 import { ReactNode } from 'react'
 import { animationProps } from '../state/constants'
@@ -60,7 +54,7 @@ const showHomeTagsAtom = atom<boolean>(false)
 
 function Home() {
   const [applications, setApplications] = useAtom(rowsAtom)
-  const [selectedRows] = useAtom(selectedRowsAtom)
+  const [selectedRows, setSelectedRows] = useAtom(selectedRowsAtom)
 
   const [tags, setTags] = useAtom(homeTagsAtom)
   const [showTags, setShowTags] = useAtom(showHomeTagsAtom)
@@ -79,6 +73,7 @@ function Home() {
       return
     }
     setApplications(response)
+    setSelectedRows([])
   }
 
   const exportCSV = () => {

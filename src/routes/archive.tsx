@@ -1,13 +1,11 @@
 import { useState, useEffect, ChangeEvent } from 'react'
 import {
-  Container,
   Title,
   Card,
   Grid,
   Text,
   TextInput,
   Flex,
-  LoadingOverlay,
   UnstyledButton,
   Center,
   keys,
@@ -25,14 +23,8 @@ import {
   IconSelector,
 } from '@tabler/icons-react'
 
-import AddApplicationModal from '../components/applications/AddApplicationModal'
-import EditApplicationModal from '../components/applications/EditApplicationModal'
-import DeleteSelectedApplicationModal from '../components/applications/DeleteSelectedApplicationsModal'
-import ImportApplicationsModal from '../components/applications/ImportApplicationsModal'
-
 import classes from './Index.module.css'
 
-import ApplicationsAPI from '../api/applications'
 import ArchiveAPI from '../api/archive'
 
 import { useDisclosure, useMediaQuery } from '@mantine/hooks'
@@ -53,15 +45,15 @@ import { animationProps } from '../state/constants'
 
 import { MotionContainer } from '../state/constants'
 
-import ArchiveCollectionModal from '../components/archive/ArchiveCollectionModal'
 import CustomPillsInput from '../components/global/CustomPillsInput'
+import ViewApplicationModal from '../components/applications/ViewApplicationModal'
 
 const archiveTagsAtom = atom<string[]>([])
 const showArchiveTagsAtom = atom<boolean>(false)
 
 function Home() {
   const [applications, setApplications] = useAtom(rowsAtom)
-  const [selectedRows] = useAtom(selectedArchiveRowsAtom)
+  const [selectedRows, setSelectedRows] = useAtom(selectedArchiveRowsAtom)
 
   const [tags, setTags] = useAtom(archiveTagsAtom)
   const [showTags, setShowTags] = useAtom(showArchiveTagsAtom)
@@ -80,6 +72,7 @@ function Home() {
       return
     }
     setApplications(response)
+    setSelectedRows([])
   }
 
   const exportCSV = () => {
@@ -134,7 +127,7 @@ function Home() {
           <Flex gap={12}>
             {selectedRows?.length > 0 && (
               <>
-                <DeleteSelectedApplicationModal callback={fillApplications} />
+                {/* <DeleteSelectedApplicationModal callback={fillApplications} /> */}
                 <Button onClick={exportCSV}>Export</Button>
               </>
             )}
@@ -273,7 +266,7 @@ function ApplicationsTable({
 
   return (
     <>
-      <EditApplicationModal
+      <ViewApplicationModal
         opened={opened}
         open={open}
         close={close}

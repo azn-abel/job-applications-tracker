@@ -26,7 +26,9 @@ export function downloadCSV(
         if (!obj.interviewDate) obj.interviewDate = ''
         if (!obj.applicationDate) obj.applicationDate = ''
         const row = headers.map((key: keyof Application) =>
-          escape(JSON.stringify(obj[key]))
+          escape(
+            typeof obj[key] === 'string' ? obj[key] : JSON.stringify(obj[key])
+          )
         )
         controller.enqueue(encoder.encode(row.join(',') + '\n'))
       }
@@ -54,8 +56,12 @@ export function importCSV(file: File): Promise<Application[]> {
     const formatted: any = {}
 
     for (const key of Object.keys(result.data) as (keyof Application)[]) {
-      // @ts-ignore
-      formatted[key] = JSON.parse(result.data[key])
+      try {
+        // @ts-ignore
+        formatted[key] = JSON.parse(result.data[key])
+      } catch {
+        formatted[key] = result.data[key]
+      }
     }
 
     if (!formatted.interviewDate) formatted.interviewDate = ''

@@ -8,12 +8,14 @@ export default function CustomPillsInput({
   description,
   showLabel,
   readOnly,
+  unstyled,
 }: {
   tags: string[]
   setTags: React.Dispatch<SetStateAction<string[]>>
   description?: string
   showLabel?: boolean
   readOnly?: boolean
+  unstyled?: boolean
 }) {
   const [inputValue, setInputValue] = useState('')
 
@@ -45,6 +47,7 @@ export default function CustomPillsInput({
             }
           }
         }}
+        variant={unstyled ? 'unstyled' : 'default'}
       >
         {tags.map((tag) => (
           <Pill
