@@ -53,7 +53,12 @@ export function importCSV(file: File): Promise<Application[]> {
   const handleResult = (result: ParseStepResult<Application>) => {
     const formatted: any = {}
 
-    for (const key of Object.keys(result.data) as (keyof Application)[]) {
+    for (const key of ApplicationKeys) {
+      if (!result.data[key]) {
+        if (key === 'tags') formatted[key] = []
+        else formatted[key] = ''
+        continue
+      }
       try {
         // @ts-ignore
         formatted[key] = JSON.parse(result.data[key])
