@@ -50,10 +50,7 @@ export default function ArchiveCollectionModal({
         size="md"
       >
         <Flex direction="column" gap={12}>
-          <Text>
-            This action will archive the selected applications and cannot be
-            undone.
-          </Text>
+          <Text>This action cannot be undone.</Text>
           <Text>
             Are you sure you want to archive {rows.length} application
             {conditionalS(rows.length)}?
