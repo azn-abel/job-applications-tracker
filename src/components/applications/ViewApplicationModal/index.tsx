@@ -30,6 +30,7 @@ import {
 } from '../../../types/applications'
 
 import CustomPillsInput from '../../global/CustomPillsInput'
+import ArchiveAPI from '../../../api/archive'
 
 dayjs.extend(utc)
 dayjs.extend(timezone)
@@ -76,33 +77,9 @@ export default function EditApplicationModal({
 
   const [fetching, setFetching] = useState(false)
 
-  const updateApplication = async (values: ApplicationInput) => {
-    const body: ApplicationDTO = {
-      ...values,
-      applicationDate: formatDate(values.applicationDate!) || '',
-      interviewDate: formatDate(values.interviewDate!) || '',
-      tags,
-    }
-
-    if (body.interviewDate && ['New', 'Assessment'].includes(body.status))
-      body.status = 'Interview'
-
-    setFetching(true)
-    let result
-    if (application)
-      result = ApplicationsAPI.putApplication(application?.id, body)
-    setFetching(false)
-    if (!result) {
-      // TODO: something went wrong
-    }
-
-    close()
-    callback()
-  }
-
   const removeApplication = async () => {
     setFetching(true)
-    application && ApplicationsAPI.deleteApplication(application?.id)
+    application && ArchiveAPI.deleteArchivedApplications([application?.id])
     setFetching(false)
 
     close()
@@ -138,7 +115,7 @@ export default function EditApplicationModal({
       >
         <LoadingOverlay visible={fetching} zIndex={1000} />
         <form
-          onSubmit={form.onSubmit(updateApplication)}
+          onSubmit={form.onSubmit(close)}
           onKeyDown={(e) => {
             if (
               e.code === 'Enter' &&

@@ -51,7 +51,7 @@ export type ApplicationInput = {
   id?: string
   jobTitle: string
   company: string
-  status: ApplicationStatus
+  status: ApplicationStatus | ''
   tags: string[]
   applicationDate: Date | null
   interviewDate?: Date | null

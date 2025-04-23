@@ -45,7 +45,7 @@ export default function AddApplicationModal({
     initialValues: {
       jobTitle: '',
       company: '',
-      status: 'New',
+      status: '',
       tags: [],
       applicationDate: null,
       interviewDate: null,
@@ -66,6 +66,7 @@ export default function AddApplicationModal({
   const createApplication = async (values: ApplicationInput) => {
     const body: ApplicationDTO = {
       ...values,
+      status: values.status || 'New',
       applicationDate: formatDate(values.applicationDate) || '',
       interviewDate: formatDate(values.interviewDate) || '',
       tags: tags,
@@ -91,7 +92,7 @@ export default function AddApplicationModal({
     form.setValues({
       jobTitle: '',
       company: '',
-      status: 'New',
+      status: '',
       jobDescription: '',
       applicationDate: null,
       interviewDate: null,

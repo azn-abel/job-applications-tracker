@@ -44,7 +44,7 @@ const ArchiveAPI = {
     localStorage.setItem(ApplicationsAPI.key, JSON.stringify(remaining))
   },
 
-  deleteArchivedApplications(applicationIds: string) {
+  deleteArchivedApplications(applicationIds: string[]) {
     const archive = this.fetchArchive()
 
     localStorage.setItem(
