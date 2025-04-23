@@ -58,7 +58,7 @@ export default function EditApplicationModal({
     initialValues: {
       jobTitle: '',
       company: '',
-      status: 'New',
+      status: '',
       tags: [],
       applicationDate: null,
       interviewDate: null,
@@ -80,6 +80,7 @@ export default function EditApplicationModal({
   const updateApplication = async (values: ApplicationInput) => {
     const body: ApplicationDTO = {
       ...values,
+      status: values.status || 'New',
       applicationDate: formatDate(values.applicationDate!) || '',
       interviewDate: formatDate(values.interviewDate!) || '',
       tags,
@@ -114,7 +115,7 @@ export default function EditApplicationModal({
     form.setValues({
       jobTitle: application?.jobTitle || '',
       company: application?.company || '',
-      status: application?.status || 'New',
+      status: application?.status || '',
       jobDescription: application?.jobDescription || '',
       tags: application?.tags,
       applicationDate: dayjs(application?.applicationDate).toDate(),
