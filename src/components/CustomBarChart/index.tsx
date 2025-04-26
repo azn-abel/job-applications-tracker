@@ -1,4 +1,4 @@
-import { BarChart } from '@mantine/charts'
+import { BarChart, BarChartSeries } from '@mantine/charts'
 import { Application } from '../../types/applications'
 
 import { getLastSixMonths } from '../../utils/dates'
@@ -20,6 +20,9 @@ export default function CustomBarChart({
       yAxisProps={{
         allowDecimals: false,
       }}
+      barProps={(series: BarChartSeries) => ({
+        onClick: (data: string, index: number) => {},
+      })}
     />
   )
 }
