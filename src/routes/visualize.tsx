@@ -3,12 +3,17 @@ import { Flex, Title } from '@mantine/core'
 import ApplicationsAPI from '../api/applications'
 
 import SankeyChart from '../components/SankeyChart/sankey'
+import CustomBarChart from '../components/CustomBarChart'
+import InterviewTimeline from '../components/InterviewTimeline'
 
 import { Application } from '../types/applications'
 
-import { animationProps, MotionFlex } from '../state/constants'
+import { animationProps, MotionFlex, MotionContainer } from '../state/constants'
+import { useMediaQuery } from '@mantine/hooks'
 
 export default function Visualize() {
+  const smallScreen = useMediaQuery('(max-width: 512px)')
+
   const [loading, setLoading] = useState(true)
 
   const [applications, setApplications] = useState<Application[]>([])
@@ -61,21 +66,50 @@ export default function Visualize() {
 
   return (
     <>
-      <MotionFlex {...animationProps} justify="center" align="start">
-        {applications.length === 0 ? (
-          <Title order={2}>Nothing to show.</Title>
-        ) : (
-          <SankeyChart
-            applications={applications}
-            interviews={interviews}
-            offers={offers}
-            rejectionsNoInterview={rejectionsNoInterview}
-            applicationsNoResponse={applicationsNoResponse}
-            interviewsNoResponse={interviewsNoResponse}
-            interviewsRejected={interviewsRejected}
-          />
-        )}
-      </MotionFlex>
+      <MotionContainer mb={64}>
+        <MotionFlex
+          {...animationProps}
+          justify="center"
+          align="center"
+          direction="column"
+          gap={12}
+        >
+          {applications.length === 0 ? (
+            <Title order={2}>Nothing to show.</Title>
+          ) : (
+            <>
+              <Title w="100%">This season...</Title>
+              <SankeyChart
+                applications={applications}
+                interviews={interviews}
+                offers={offers}
+                rejectionsNoInterview={rejectionsNoInterview}
+                applicationsNoResponse={applicationsNoResponse}
+                interviewsNoResponse={interviewsNoResponse}
+                interviewsRejected={interviewsRejected}
+              />
+              <MotionFlex
+                direction={smallScreen ? 'column' : 'row'}
+                w="100%"
+                gap={24}
+              >
+                <MotionFlex direction="column" w={smallScreen ? '100%' : '50%'}>
+                  <Title order={3} w="100%" mb={16}>
+                    Upcoming Interviews
+                  </Title>
+                  <InterviewTimeline applications={applications} />
+                </MotionFlex>
+                <MotionFlex direction="column" w={smallScreen ? '100%' : '50%'}>
+                  <Title order={3} w="100%" mb={16}>
+                    Past 6 Months
+                  </Title>
+                  <CustomBarChart applications={applications} />
+                </MotionFlex>
+              </MotionFlex>
+            </>
+          )}
+        </MotionFlex>
+      </MotionContainer>
     </>
   )
 }

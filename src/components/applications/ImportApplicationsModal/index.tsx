@@ -31,7 +31,6 @@ export default function ImportApplicationsModal({
       callback()
     } catch (e) {
       setError('Invalid CSV.')
-      console.log(e)
     }
   }
 
