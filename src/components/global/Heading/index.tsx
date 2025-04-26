@@ -54,7 +54,7 @@ export default function Heading() {
     >
       <Container size="md" className={classes.inner} pos="relative">
         <Link to="/" style={{ textDecoration: 'none', color: 'black' }}>
-          <Text>Job Tracker</Text>
+          <Text>Job Applications</Text>
         </Link>
         <Group gap={5} visibleFrom="xs">
           {items}

@@ -96,7 +96,9 @@ export default function AddApplicationModal({
       jobDescription: '',
       applicationDate: null,
       interviewDate: null,
+      tags: [],
     })
+    setTags([])
   }, [opened])
 
   return (

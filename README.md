@@ -2,11 +2,11 @@
 
 Track your job applications with ease — no sign-up, no clutter.
 
-Try it here: [job-applications-tracker.pages.dev](https://job-applications-tracker.pages.dev)
+Try it here: [jobapps.pages.dev](https://jobapps.pages.dev)
 
 ## ✨ Features
 
-- Add and manage job applications with job title, company, status, and job description
+- Add and manage job applications
 - Interactive Sankey chart to visualize your job application flow
 - 100% private — your data stays on your device
 
