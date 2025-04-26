@@ -72,8 +72,6 @@ export default function AddApplicationModal({
       tags: tags,
     }
 
-    console.log(body)
-
     if (body.interviewDate && ['New', 'Assessment'].includes(body.status))
       body.status = 'Interview'
 
