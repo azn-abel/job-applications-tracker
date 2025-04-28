@@ -1,6 +1,8 @@
 import backendClient from './client'
 
-export async function sendGoogleToken(token: string) {
+export async function sendGoogleToken(
+  token: string
+): Promise<JSONResponse<User>> {
   try {
     const response = await backendClient.post('/auth/login-with-google', {
       token,
@@ -13,20 +15,24 @@ export async function sendGoogleToken(token: string) {
   }
 }
 
-export async function fetchCurrentUser() {
+export async function fetchCurrentUser(): Promise<JSONResponse<User>> {
   try {
     const response = await backendClient.get('/auth/current-user')
     return response.data
   } catch (e: any) {
-    e.response?.data || { success: false, detail: 'unknown error occurred' }
+    return (
+      e.response?.data || { success: false, detail: 'unknown error occurred' }
+    )
   }
 }
 
-export async function requestLogout() {
+export async function requestLogout(): Promise<JSONResponse> {
   try {
     const response = await backendClient.post('/auth/logout')
     return response.data
   } catch (e: any) {
-    e.response?.data || { success: false, detail: 'unknown error occurred' }
+    return (
+      e.response?.data || { success: false, detail: 'unknown error occurred' }
+    )
   }
 }

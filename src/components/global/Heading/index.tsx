@@ -6,6 +6,7 @@ import {
   Flex,
   Card,
   Button,
+  Avatar,
 } from '@mantine/core'
 import { useState, useEffect } from 'react'
 import useAuth from '@/hooks/auth'
@@ -20,6 +21,9 @@ import { animationProps } from '../../../state/constants'
 import { requestLogout } from '@/api/auth'
 import { authenticatedAtom } from '@/hooks/auth'
 import { useAtom } from 'jotai'
+
+import { isOnlineAtom } from '@/state/online'
+
 const links = [
   { link: '/', label: 'Home' },
   { link: '/visualize', label: 'Visualize' },
@@ -29,8 +33,9 @@ const links = [
 const MotionCard = motion.create(Card as any)
 
 export default function Heading() {
-  const { logout } = useAuth()
-  const [isAuthenticated] = useAtom(authenticatedAtom)
+  const { user, isAuthenticated, logout } = useAuth()
+  // const [isAuthenticated] = useAtom(authenticatedAtom)
+  const [isOnline] = useAtom(isOnlineAtom)
 
   const [opened, { toggle }] = useDisclosure(false)
   const [active, setActive] = useState(window.location.pathname)
@@ -74,11 +79,13 @@ export default function Heading() {
         </Link>
         <Group gap={5} visibleFrom="xs">
           {items}
-          {isAuthenticated ? (
-            <LogoutButton callback={logout} />
-          ) : (
-            <GoogleSignInButton />
-          )}
+          {isOnline &&
+            (isAuthenticated ? (
+              <LogoutButton callback={logout} />
+            ) : (
+              <GoogleSignInButton />
+            ))}
+          <Avatar ml={8} src={user?.picture} />
         </Group>
         <Burger opened={opened} onClick={toggle} hiddenFrom="xs" size="sm" />
         <AnimatePresence>
@@ -99,11 +106,13 @@ export default function Heading() {
                 bg={'white'}
               >
                 {items}
-                {isAuthenticated ? (
-                  <LogoutButton callback={logout} />
-                ) : (
-                  <GoogleSignInButton />
-                )}
+                {isOnline &&
+                  (isAuthenticated ? (
+                    <LogoutButton callback={logout} />
+                  ) : (
+                    <GoogleSignInButton />
+                  ))}
+                <Avatar src={user?.picture} />
               </Flex>
             </MotionCard>
           )}
@@ -122,6 +131,7 @@ function LogoutButton({ callback }: { callback: () => void }) {
       onClick={() => {
         callback()
       }}
+      miw={90}
     >
       Sign Out
     </Button>

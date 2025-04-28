@@ -3,11 +3,12 @@ import { fetchCurrentUser, requestLogout, sendGoogleToken } from '@/api/auth'
 import { atom, useAtom } from 'jotai'
 
 export const authenticatedAtom = atom(false)
+export const userAtom = atom<User | null>(null)
 
 export default function useAuth() {
-  const [user, setUser] = useState<null | { username: string }>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [isAuthenticated, setIsAuthenticated] = useAtom(authenticatedAtom)
+  const [user, setUser] = useAtom(userAtom)
 
   useEffect(() => {
     const initializeAuth = async () => {
@@ -41,5 +42,5 @@ export default function useAuth() {
     }
   }
 
-  return { user, isLoading, login, logout }
+  return { user, isAuthenticated, isLoading, login, logout }
 }
