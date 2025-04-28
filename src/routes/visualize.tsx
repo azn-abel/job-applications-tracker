@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Flex, Title } from '@mantine/core'
-import ApplicationsAPI from '../api/applications'
+import ApplicationsAPI from '../localStorage/applications'
 
 import SankeyChart from '../components/SankeyChart/sankey'
 import CustomBarChart from '../components/CustomBarChart'

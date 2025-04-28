@@ -30,13 +30,13 @@ import ImportApplicationsModal from '../components/applications/ImportApplicatio
 
 import classes from './Index.module.css'
 
-import ApplicationsAPI from '../api/applications'
+import ApplicationsAPI from '../localStorage/applications'
 
 import { useDisclosure, useMediaQuery } from '@mantine/hooks'
 
 import { atom, useAtom } from 'jotai'
 import { rowsAtom, selectedRowsAtom } from '../state'
-import { downloadCSV } from '../api/io'
+import { downloadCSV } from '../localStorage/io'
 import { conditionalS } from '../utils'
 
 import { Application, FilterableApplication } from '../types/applications'

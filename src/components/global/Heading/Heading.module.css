@@ -35,3 +35,13 @@
     color: var(--mantine-color-white);
   }
 }
+
+.button {
+  display: block;
+  padding: 0 12px;
+  height: 30px;
+  border-radius: var(--mantine-radius-sm);
+  text-decoration: none;
+  font-size: var(--mantine-font-size-sm);
+  font-weight: 500;
+}

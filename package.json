@@ -37,6 +37,7 @@
     "@eslint/js": "^9.21.0",
     "@types/d3": "^7.4.3",
     "@types/d3-sankey": "^0.12.4",
+    "@types/google.accounts": "^0.0.15",
     "@types/papaparse": "^5.3.15",
     "@types/react": "^19.1.2",
     "@types/react-dom": "^19.1.2",

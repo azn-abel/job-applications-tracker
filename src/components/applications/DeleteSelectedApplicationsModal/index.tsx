@@ -1,6 +1,6 @@
 import { useDisclosure } from '@mantine/hooks'
 import { Modal, Button, Flex, Text } from '@mantine/core'
-import ApplicationsAPI from '../../../api/applications'
+import ApplicationsAPI from '../../../localStorage/applications'
 
 import { useAtom } from 'jotai'
 import { selectedRowsAtom } from '../../../state'

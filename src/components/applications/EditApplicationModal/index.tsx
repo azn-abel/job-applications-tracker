@@ -14,7 +14,7 @@ import dayjs from 'dayjs'
 import utc from 'dayjs/plugin/utc'
 import timezone from 'dayjs/plugin/timezone'
 
-import ApplicationsAPI from '../../../api/applications'
+import ApplicationsAPI from '../../../localStorage/applications'
 
 import { uniqueJobTitlesAtom, uniqueCompaniesAtom } from '../../../state'
 import { useAtom } from 'jotai'

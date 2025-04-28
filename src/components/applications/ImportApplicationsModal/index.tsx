@@ -2,8 +2,8 @@ import { useDisclosure } from '@mantine/hooks'
 import { useState } from 'react'
 import { Modal, Button } from '@mantine/core'
 import { FileButton, Group, Text, Flex } from '@mantine/core'
-import { importCSV } from '../../../api/io'
-import ApplicationsAPI from '../../../api/applications'
+import { importCSV } from '../../../localStorage/io'
+import ApplicationsAPI from '../../../localStorage/applications'
 
 export default function ImportApplicationsModal({
   callback,

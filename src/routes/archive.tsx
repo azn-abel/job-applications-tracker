@@ -25,13 +25,13 @@ import {
 
 import classes from './Index.module.css'
 
-import ArchiveAPI from '../api/archive'
+import ArchiveAPI from '../localStorage/archive'
 
 import { useDisclosure, useMediaQuery } from '@mantine/hooks'
 
 import { atom, useAtom } from 'jotai'
 import { rowsAtom, selectedArchiveRowsAtom } from '../state'
-import { downloadCSV } from '../api/io'
+import { downloadCSV } from '../localStorage/io'
 import { conditionalS } from '../utils'
 
 import {

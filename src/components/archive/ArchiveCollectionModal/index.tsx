@@ -1,6 +1,6 @@
 import { useDisclosure } from '@mantine/hooks'
 import { Modal, Button, Flex, Text, TextInput } from '@mantine/core'
-import ArchiveAPI from '../../../api/archive'
+import ArchiveAPI from '../../../localStorage/archive'
 
 import { useState } from 'react'
 

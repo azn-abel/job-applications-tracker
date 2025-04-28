@@ -13,7 +13,7 @@ import dayjs from 'dayjs'
 import utc from 'dayjs/plugin/utc'
 import timezone from 'dayjs/plugin/timezone'
 
-import ApplicationsAPI from '../../../api/applications'
+import ApplicationsAPI from '../../../localStorage/applications'
 
 import { uniqueJobTitlesAtom, uniqueCompaniesAtom } from '../../../state'
 import { useAtom } from 'jotai'
@@ -30,7 +30,7 @@ import {
 } from '../../../types/applications'
 
 import CustomPillsInput from '../../global/CustomPillsInput'
-import ArchiveAPI from '../../../api/archive'
+import ArchiveAPI from '../../../localStorage/archive'
 
 dayjs.extend(utc)
 dayjs.extend(timezone)

@@ -1,12 +1,25 @@
-import { Container, Text, Group, Burger, Flex, Card } from '@mantine/core'
+import {
+  Container,
+  Text,
+  Group,
+  Burger,
+  Flex,
+  Card,
+  Button,
+} from '@mantine/core'
 import { useState, useEffect } from 'react'
+import useAuth from '@/hooks/auth'
 import classes from './Heading.module.css'
+
+import GoogleSignInButton from '../GoogleSignInButton'
 
 import { Link } from 'react-router'
 import { useDisclosure } from '@mantine/hooks'
 import { motion, AnimatePresence } from 'framer-motion'
 import { animationProps } from '../../../state/constants'
-
+import { requestLogout } from '@/api/auth'
+import { authenticatedAtom } from '@/hooks/auth'
+import { useAtom } from 'jotai'
 const links = [
   { link: '/', label: 'Home' },
   { link: '/visualize', label: 'Visualize' },
@@ -16,6 +29,9 @@ const links = [
 const MotionCard = motion.create(Card as any)
 
 export default function Heading() {
+  const { logout } = useAuth()
+  const [isAuthenticated] = useAtom(authenticatedAtom)
+
   const [opened, { toggle }] = useDisclosure(false)
   const [active, setActive] = useState(window.location.pathname)
   const items = links.map((link) => (
@@ -58,6 +74,11 @@ export default function Heading() {
         </Link>
         <Group gap={5} visibleFrom="xs">
           {items}
+          {isAuthenticated ? (
+            <LogoutButton callback={logout} />
+          ) : (
+            <GoogleSignInButton />
+          )}
         </Group>
         <Burger opened={opened} onClick={toggle} hiddenFrom="xs" size="sm" />
         <AnimatePresence>
@@ -78,11 +99,31 @@ export default function Heading() {
                 bg={'white'}
               >
                 {items}
+                {isAuthenticated ? (
+                  <LogoutButton callback={logout} />
+                ) : (
+                  <GoogleSignInButton />
+                )}
               </Flex>
             </MotionCard>
           )}
         </AnimatePresence>
       </Container>
     </header>
+  )
+}
+
+function LogoutButton({ callback }: { callback: () => void }) {
+  return (
+    <Button
+      className={classes.button}
+      color="red"
+      size="sm"
+      onClick={() => {
+        callback()
+      }}
+    >
+      Sign Out
+    </Button>
   )
 }
