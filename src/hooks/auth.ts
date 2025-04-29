@@ -52,9 +52,9 @@ export default function useAuth() {
     const response = await requestLogout()
     if (response.success) {
       setUser(null)
-      setIsAuthenticated(false)
       setArchiveApplications([])
       setHomeApplications([])
+      setIsAuthenticated(false)
     }
   }
 
