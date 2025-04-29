@@ -13,9 +13,12 @@ import { useMediaQuery } from '@mantine/hooks'
 import { homeApplicationsAtom } from '@/state'
 import { useAtom } from 'jotai'
 import useApplicationsAPI from '@/hooks/applications'
+import { authenticatedAtom } from '@/hooks/auth'
 
 export default function Visualize() {
   const smallScreen = useMediaQuery('(max-width: 512px)')
+
+  const [isAuthenticated] = useAtom(authenticatedAtom)
 
   const [loading, setLoading] = useState(true)
 
@@ -78,7 +81,7 @@ export default function Visualize() {
 
   useEffect(() => {
     onMount()
-  }, [])
+  }, [isAuthenticated])
 
   if (loading) return <></>
 

@@ -5,6 +5,7 @@ import {
   sendGoogleToken,
 } from '@/api/network/auth'
 import { atom, useAtom } from 'jotai'
+import { archiveApplicationsAtom, homeApplicationsAtom } from '@/state'
 
 export const authenticatedAtom = atom(false)
 export const userAtom = atom<User | null>(null)
@@ -13,6 +14,10 @@ export const authLoadingAtom = atom(true)
 export default function useAuth() {
   const [isLoading, setIsLoading] = useAtom(authLoadingAtom)
   const [isAuthenticated, setIsAuthenticated] = useAtom(authenticatedAtom)
+  const [homeApplications, setHomeApplications] = useAtom(homeApplicationsAtom)
+  const [archiveApplications, setArchiveApplications] = useAtom(
+    archiveApplicationsAtom
+  )
   const [user, setUser] = useAtom(userAtom)
 
   useEffect(() => {
@@ -48,6 +53,8 @@ export default function useAuth() {
     if (response.success) {
       setUser(null)
       setIsAuthenticated(false)
+      setArchiveApplications([])
+      setHomeApplications([])
     }
   }
 
