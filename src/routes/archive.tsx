@@ -1,4 +1,4 @@
-import { useState, useEffect, ChangeEvent } from 'react'
+import { useState, useEffect, ChangeEvent, useRef } from 'react'
 import {
   Title,
   Card,
@@ -42,6 +42,7 @@ import { MotionContainer } from '../state/constants'
 import CustomPillsInput from '../components/global/CustomPillsInput'
 import ViewApplicationModal from '../components/applications/ViewApplicationModal'
 import useArchiveAPI from '@/hooks/archive'
+import { authenticatedAtom } from '@/hooks/auth'
 
 const archiveTagsAtom = atom<string[]>([])
 const showArchiveTagsAtom = atom<boolean>(false)
@@ -49,6 +50,10 @@ const showArchiveTagsAtom = atom<boolean>(false)
 export default function Archive() {
   const [applications, setApplications] = useAtom(archiveApplicationsAtom)
   const [selectedRows, setSelectedRows] = useAtom(selectedArchiveRowsAtom)
+
+  const [isAuthenticated] = useAtom(authenticatedAtom)
+
+  const isFirstRender = useRef(true)
 
   const { fetchArchive } = useArchiveAPI()
 
@@ -63,9 +68,7 @@ export default function Archive() {
   const smallScreen = useMediaQuery('(max-width: 512px)')
 
   const fillApplications = async () => {
-    console.log('called')
     const response = await fetchArchive()
-    console.log(response)
     if (!response || !response.success) {
       // something went wrong
       return
@@ -84,8 +87,14 @@ export default function Archive() {
   }
 
   useEffect(() => {
+    if (isFirstRender.current) {
+      isFirstRender.current = false
+      if (applications.length === 0) fillApplications()
+      return
+    }
+    setApplications([])
     fillApplications()
-  }, [])
+  }, [isAuthenticated])
 
   return (
     <>
