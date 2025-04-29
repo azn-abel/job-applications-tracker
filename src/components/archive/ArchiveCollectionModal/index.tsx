@@ -3,7 +3,7 @@ import { Modal, Button, Flex, Text } from '@mantine/core'
 
 import { useState } from 'react'
 
-import { selectedRowsAtom } from '../../../state'
+import { archiveApplicationsAtom, selectedRowsAtom } from '../../../state'
 import { useAtom } from 'jotai'
 import { conditionalS } from '../../../utils'
 import { isOnlineAtom } from '@/state/online'
@@ -18,21 +18,31 @@ export default function ArchiveCollectionModal({
   const [isOnline] = useAtom(isOnlineAtom)
   const [isAuthenticated] = useAtom(authenticatedAtom)
 
-  const { postToArchive } = useArchiveAPI()
+  const { postToArchive, fetchArchive } = useArchiveAPI()
 
   const [opened, { open, close }] = useDisclosure(false)
   const [error, setError] = useState('')
 
   const [rows] = useAtom(selectedRowsAtom)
 
+  const [archiveRows, setArchiveRows] = useAtom(archiveApplicationsAtom)
+
   const archiveCollection = async () => {
     setError('')
-    const response = await postToArchive(rows)
+    const postResponse = await postToArchive(rows)
 
-    if (!response.success) {
-      setError(response.detail)
+    if (!postResponse.success) {
+      setError(postResponse.detail)
       return
     }
+
+    const fetchResponse = await fetchArchive()
+
+    if (!fetchResponse.success) {
+      setError(fetchResponse.detail)
+      return
+    }
+    setArchiveRows(Object.values(fetchResponse.data))
     close()
     callback()
   }
