@@ -35,7 +35,9 @@ export default function InterviewTimeline({
       {interviews.length > 0 ? (
         interviews.map((interview) => {
           return (
-            <Timeline.Item title={interview.company}>
+            <Timeline.Item
+              title={interview.company + ' - ' + interview.jobTitle}
+            >
               <Text size="xs" mt={4}>
                 {interview.interviewDate}
               </Text>

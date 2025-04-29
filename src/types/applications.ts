@@ -23,7 +23,10 @@ export type Application = {
   applicationDate: DateString
   interviewDate: DateString
   jobDescription: string
+  lastUpdated: Date
 }
+
+export type ApplicationStore = Record<string, Application>
 
 export const ApplicationKeys: (keyof Application)[] = [
   'id',

@@ -13,7 +13,7 @@ import dayjs from 'dayjs'
 import utc from 'dayjs/plugin/utc'
 import timezone from 'dayjs/plugin/timezone'
 
-import ApplicationsAPI from '../../../localStorage/applications'
+import LocalApplicationsAPI from '../../../api/localStorage/applications'
 
 import { uniqueJobTitlesAtom, uniqueCompaniesAtom } from '../../../state'
 import { useAtom } from 'jotai'
@@ -30,7 +30,7 @@ import {
 } from '../../../types/applications'
 
 import CustomPillsInput from '../../global/CustomPillsInput'
-import ArchiveAPI from '../../../localStorage/archive'
+import LocalArchiveAPI from '../../../api/localStorage/archive'
 
 dayjs.extend(utc)
 dayjs.extend(timezone)
@@ -79,7 +79,7 @@ export default function EditApplicationModal({
 
   const removeApplication = async () => {
     setFetching(true)
-    application && ArchiveAPI.deleteArchivedApplications([application?.id])
+    application && LocalArchiveAPI.deleteArchivedApplications([application?.id])
     setFetching(false)
 
     close()

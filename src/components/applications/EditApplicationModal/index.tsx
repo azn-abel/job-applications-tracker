@@ -2,7 +2,6 @@ import {
   Modal,
   Button,
   Flex,
-  TextInput,
   Select,
   Textarea,
   LoadingOverlay,
@@ -13,8 +12,6 @@ import { isNotEmpty, useForm } from '@mantine/form'
 import dayjs from 'dayjs'
 import utc from 'dayjs/plugin/utc'
 import timezone from 'dayjs/plugin/timezone'
-
-import ApplicationsAPI from '../../../localStorage/applications'
 
 import { uniqueJobTitlesAtom, uniqueCompaniesAtom } from '../../../state'
 import { useAtom } from 'jotai'
@@ -31,6 +28,8 @@ import {
 } from '../../../types/applications'
 
 import CustomPillsInput from '../../global/CustomPillsInput'
+
+import useApplicationsAPI from '@/hooks/applications'
 
 dayjs.extend(utc)
 dayjs.extend(timezone)
@@ -51,7 +50,11 @@ export default function EditApplicationModal({
   const [uniqueJobTitles] = useAtom(uniqueJobTitlesAtom)
   const [uniqueCompanies] = useAtom(uniqueCompaniesAtom)
 
+  const { deleteApplication } = useApplicationsAPI()
+
   const [tags, setTags] = useState<string[]>([])
+
+  const { putApplication } = useApplicationsAPI()
 
   const form = useForm<ApplicationInput>({
     mode: 'uncontrolled',
@@ -90,11 +93,10 @@ export default function EditApplicationModal({
       body.status = 'Interview'
 
     setFetching(true)
-    let result
-    if (application)
-      result = ApplicationsAPI.putApplication(application?.id, body)
+    let result: JSONResponse<Application> | null = null
+    if (application) result = await putApplication(application?.id, body)
     setFetching(false)
-    if (!result) {
+    if (!result || !result.success) {
       // TODO: something went wrong
     }
 
@@ -104,7 +106,7 @@ export default function EditApplicationModal({
 
   const removeApplication = async () => {
     setFetching(true)
-    application && ApplicationsAPI.deleteApplication(application?.id)
+    application && (await deleteApplication(application.id))
     setFetching(false)
 
     close()

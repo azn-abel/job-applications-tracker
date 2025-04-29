@@ -1,39 +1,44 @@
 import { useDisclosure } from '@mantine/hooks'
-import { Modal, Button, Flex, Text, TextInput } from '@mantine/core'
-import ArchiveAPI from '../../../localStorage/archive'
+import { Modal, Button, Flex, Text } from '@mantine/core'
 
 import { useState } from 'react'
 
-import { rowsAtom, selectedRowsAtom } from '../../../state'
+import { selectedRowsAtom } from '../../../state'
 import { useAtom } from 'jotai'
 import { conditionalS } from '../../../utils'
+import { isOnlineAtom } from '@/state/online'
+import { authenticatedAtom } from '@/hooks/auth'
+import useArchiveAPI from '@/hooks/archive'
 
 export default function ArchiveCollectionModal({
   callback,
 }: {
   callback: () => void
 }) {
+  const [isOnline] = useAtom(isOnlineAtom)
+  const [isAuthenticated] = useAtom(authenticatedAtom)
+
+  const { postToArchive } = useArchiveAPI()
+
   const [opened, { open, close }] = useDisclosure(false)
-  const [name, setName] = useState('')
   const [error, setError] = useState('')
 
   const [rows] = useAtom(selectedRowsAtom)
 
   const archiveCollection = async () => {
     setError('')
-    try {
-      ArchiveAPI.archiveApplications(rows)
-      close()
-      callback()
-      setName('')
-    } catch (e: any) {
-      setError(e.message)
+    const response = await postToArchive(rows)
+
+    if (!response.success) {
+      setError(response.detail)
+      return
     }
+    close()
+    callback()
   }
 
   const onClose = () => {
     setError('')
-    setName('')
     close()
   }
 
@@ -71,10 +76,15 @@ export default function ArchiveCollectionModal({
           </Button>
         </Flex>
       </Modal>
-
-      <Button disabled={rows.length === 0} onClick={open}>
-        Archive
-      </Button>
+      {(!isOnline && isAuthenticated) || (
+        <Button
+          disabled={rows.length === 0}
+          onClick={open}
+          hidden={!isOnline && isAuthenticated}
+        >
+          Archive
+        </Button>
+      )}
     </>
   )
 }

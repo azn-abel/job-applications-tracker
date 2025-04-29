@@ -1,6 +1,6 @@
 import Papa, { ParseStepResult } from 'papaparse'
-import ApplicationsAPI from './applications'
-import { Application, ApplicationKeys } from '../types/applications'
+import LocalApplicationsAPI from './applications'
+import { Application, ApplicationKeys } from '../../types/applications'
 
 export function downloadCSV(
   data: Application[],
@@ -48,7 +48,8 @@ export function downloadCSV(
 }
 
 export function importCSV(file: File): Promise<Application[]> {
-  const ids = ApplicationsAPI.fetchApplications().map((row) => row.id)
+  const applications = LocalApplicationsAPI.fetchApplications()
+  const ids = Object.keys(applications)
   const results: Application[] = []
   const handleResult = (result: ParseStepResult<Application>) => {
     const formatted: any = {}

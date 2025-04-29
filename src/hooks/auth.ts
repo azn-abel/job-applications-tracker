@@ -1,12 +1,17 @@
 import { useState, useEffect } from 'react'
-import { fetchCurrentUser, requestLogout, sendGoogleToken } from '@/api/auth'
+import {
+  fetchCurrentUser,
+  requestLogout,
+  sendGoogleToken,
+} from '@/api/network/auth'
 import { atom, useAtom } from 'jotai'
 
 export const authenticatedAtom = atom(false)
 export const userAtom = atom<User | null>(null)
+export const authLoadingAtom = atom(true)
 
 export default function useAuth() {
-  const [isLoading, setIsLoading] = useState(true)
+  const [isLoading, setIsLoading] = useAtom(authLoadingAtom)
   const [isAuthenticated, setIsAuthenticated] = useAtom(authenticatedAtom)
   const [user, setUser] = useAtom(userAtom)
 
@@ -24,6 +29,10 @@ export default function useAuth() {
     }
 
     initializeAuth()
+
+    return () => {
+      console.log('unmount')
+    }
   }, [])
 
   const login = async (token: string) => {

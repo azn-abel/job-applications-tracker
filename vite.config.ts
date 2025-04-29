@@ -12,6 +12,37 @@ export default defineConfig({
       registerType: 'autoUpdate',
       workbox: {
         globPatterns: ['**/*.{js,css,html,ico,png,svg}'],
+        runtimeCaching: [
+          {
+            urlPattern: ({ request: _any }) => true,
+            handler: 'NetworkFirst',
+            options: {
+              cacheName: 'response-cache',
+              networkTimeoutSeconds: 5,
+              cacheableResponse: {
+                statuses: [0, 200],
+              },
+              expiration: {
+                maxEntries: 200,
+                maxAgeSeconds: 7 * 24 * 60 * 60, // 7 days
+              },
+            },
+          },
+          {
+            urlPattern: /^https:\/\/lh3.googleusercontent.com\/.*/i,
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'google-pfp-cache',
+              expiration: {
+                maxEntries: 10,
+                maxAgeSeconds: 60 * 60 * 2, // 2 hours
+              },
+              cacheableResponse: {
+                statuses: [0, 200],
+              },
+            },
+          },
+        ],
       },
     }),
   ],
@@ -25,5 +56,12 @@ export default defineConfig({
     watch: {
       usePolling: true,
     },
+    // proxy: {
+    //   '/api': {
+    //     target: 'http://localhost:8787',
+    //     changeOrigin: true,
+    //     rewrite: (path) => path.replace(/^\/api/, ''),
+    //   },
+    // },
   },
 })

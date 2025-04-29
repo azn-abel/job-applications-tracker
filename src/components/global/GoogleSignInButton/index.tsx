@@ -1,13 +1,24 @@
 import { useEffect, useRef } from 'react'
-import { fetchCurrentUser, sendGoogleToken } from '@/api/auth'
+import { fetchCurrentUser, sendGoogleToken } from '@/api/network/auth'
 
 import classes from './GoogleSignInButton.module.css'
-import useAuth from '@/hooks/auth'
+import useAuth, { authenticatedAtom, userAtom } from '@/hooks/auth'
+import { useAtom } from 'jotai'
 
 export default function GoogleSignInButton() {
   const buttonDivRef = useRef<HTMLDivElement>(null)
 
-  const { login } = useAuth()
+  const [user, setUser] = useAtom(userAtom)
+  const [isAuthenticated, setIsAuthenticated] = useAtom(authenticatedAtom)
+
+  const login = async (token: string) => {
+    const response = await sendGoogleToken(token)
+    if (response.success) {
+      setUser(response.data)
+      setIsAuthenticated(true)
+    }
+    return response
+  }
 
   useEffect(() => {
     const script = document.createElement('script')
@@ -15,6 +26,7 @@ export default function GoogleSignInButton() {
     script.async = true
     script.defer = true
     script.onload = () => {
+      console.log(window.location.origin)
       if (window.google && buttonDivRef.current) {
         window.google.accounts.id.initialize({
           client_id:
@@ -23,7 +35,10 @@ export default function GoogleSignInButton() {
           ux_mode: 'popup',
           login_uri: import.meta.env.BASE_URL,
           auto_select: false,
+          prompt_parent_id: '',
           callback: async (response) => {
+            // TODO: prompt user to sync applications from remote to local
+            console.log(response.credential)
             await login(response.credential)
           },
         })

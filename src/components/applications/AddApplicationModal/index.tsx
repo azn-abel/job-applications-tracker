@@ -9,7 +9,6 @@ import {
 } from '@mantine/core'
 import { DateInput } from '@mantine/dates'
 import { isNotEmpty, useForm } from '@mantine/form'
-import ApplicationsAPI from '../../../localStorage/applications'
 import { useEffect, useState } from 'react'
 import dayjs from 'dayjs'
 
@@ -27,6 +26,10 @@ import {
 
 import CustomPillsInput from '../../global/CustomPillsInput'
 
+import useApplicationsAPI from '@/hooks/applications'
+import { isOnlineAtom } from '@/state/online'
+import { authenticatedAtom } from '@/hooks/auth'
+
 export default function AddApplicationModal({
   callback,
 }: {
@@ -35,10 +38,15 @@ export default function AddApplicationModal({
   const [opened, { open, close }] = useDisclosure(false)
   const [fetching, setFetching] = useState(false)
 
+  const [isOnline] = useAtom(isOnlineAtom)
+  const [isAuthenticated] = useAtom(authenticatedAtom)
+
   const [uniqueJobTitles] = useAtom(uniqueJobTitlesAtom)
   const [uniqueCompanies] = useAtom(uniqueCompaniesAtom)
 
   const [tags, setTags] = useState<string[]>([])
+
+  const { postApplication } = useApplicationsAPI()
 
   const form = useForm<ApplicationInput>({
     mode: 'uncontrolled',
@@ -76,9 +84,10 @@ export default function AddApplicationModal({
       body.status = 'Interview'
 
     setFetching(true)
-    const result = ApplicationsAPI.postApplication(body)
+    const result = await postApplication(body)
     setFetching(false)
-    if (!result) {
+
+    if (!result.success) {
       //something went wrong
       return
     }
@@ -192,10 +201,15 @@ export default function AddApplicationModal({
           </Flex>
         </form>
       </Modal>
-
-      <Button variant="default" onClick={open}>
-        Add
-      </Button>
+      {(!isOnline && isAuthenticated) || (
+        <Button
+          variant="default"
+          onClick={open}
+          hidden={!isOnline && isAuthenticated}
+        >
+          Add
+        </Button>
+      )}
     </>
   )
 }

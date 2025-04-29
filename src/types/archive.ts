@@ -1,7 +1,3 @@
 import { Application } from './applications'
 
-export type Collection = Application[]
-
-export type Collections = {
-  [key: string]: Collection
-}
+export type Archive = Record<string, Application>

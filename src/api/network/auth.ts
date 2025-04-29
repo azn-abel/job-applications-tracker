@@ -20,6 +20,7 @@ export async function fetchCurrentUser(): Promise<JSONResponse<User>> {
     const response = await backendClient.get('/auth/current-user')
     return response.data
   } catch (e: any) {
+    console.log(e)
     return (
       e.response?.data || { success: false, detail: 'unknown error occurred' }
     )

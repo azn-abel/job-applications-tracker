@@ -1,4 +1,4 @@
-import { useState, useEffect, ChangeEvent } from 'react'
+import { useState, useEffect, ChangeEvent, useRef } from 'react'
 import {
   Title,
   Card,
@@ -14,6 +14,8 @@ import {
   Table,
   Button,
   Switch,
+  Container,
+  LoadingOverlay,
 } from '@mantine/core'
 import cx from 'clsx'
 import {
@@ -30,13 +32,13 @@ import ImportApplicationsModal from '../components/applications/ImportApplicatio
 
 import classes from './Index.module.css'
 
-import ApplicationsAPI from '../localStorage/applications'
+import LocalApplicationsAPI from '../api/localStorage/applications'
 
 import { useDisclosure, useMediaQuery } from '@mantine/hooks'
 
 import { atom, useAtom } from 'jotai'
-import { rowsAtom, selectedRowsAtom } from '../state'
-import { downloadCSV } from '../localStorage/io'
+import { homeApplicationsAtom, selectedRowsAtom } from '../state'
+import { downloadCSV } from '../api/localStorage/io'
 import { conditionalS } from '../utils'
 
 import { Application, FilterableApplication } from '../types/applications'
@@ -49,12 +51,23 @@ import { MotionContainer } from '../state/constants'
 import ArchiveCollectionModal from '../components/archive/ArchiveCollectionModal'
 import CustomPillsInput from '../components/global/CustomPillsInput'
 
+import { authenticatedAtom, authLoadingAtom } from '@/hooks/auth'
+import useApplicationsAPI from '@/hooks/applications'
+import { isOnlineAtom } from '@/state/online'
+
+import OfflineAlert from '@/components/global/OfflineAlert'
+
 const homeTagsAtom = atom<string[]>([])
 const showHomeTagsAtom = atom<boolean>(false)
 
 function Home() {
-  const [applications, setApplications] = useAtom(rowsAtom)
+  const [applications, setApplications] = useAtom(homeApplicationsAtom)
   const [selectedRows, setSelectedRows] = useAtom(selectedRowsAtom)
+
+  const [isAuthenticated] = useAtom(authenticatedAtom)
+  const [isLoading] = useAtom(authLoadingAtom)
+
+  const { fetchApplications } = useApplicationsAPI()
 
   const [tags, setTags] = useAtom(homeTagsAtom)
   const [showTags, setShowTags] = useAtom(showHomeTagsAtom)
@@ -67,12 +80,9 @@ function Home() {
   const smallScreen = useMediaQuery('(max-width: 512px)')
 
   const fillApplications = async () => {
-    const response = ApplicationsAPI.fetchApplications()
-    if (!response) {
-      // something went wrong
-      return
-    }
-    setApplications(response)
+    const response = await fetchApplications()
+    if (!response.success) setApplications([])
+    else setApplications(Object.values(response.data))
     setSelectedRows([])
   }
 
@@ -85,9 +95,19 @@ function Home() {
     )
   }
 
+  const isFirstRender = useRef(true)
+
   useEffect(() => {
+    if (isFirstRender.current) {
+      isFirstRender.current = false
+      if (applications.length === 0) fillApplications()
+      return
+    }
+    setApplications([])
     fillApplications()
-  }, [])
+  }, [isAuthenticated])
+
+  if (isLoading) return <></>
 
   return (
     <>
@@ -180,8 +200,11 @@ function ApplicationsTable({
   const [sortBy, setSortBy] = useState<keyof FilterableApplication | null>(null)
   const [reverseSortDirection, setReverseSortDirection] = useState(false)
 
-  const [tags, setTags] = useAtom(homeTagsAtom)
-  const [showTags, setShowTags] = useAtom(showHomeTagsAtom)
+  const [tags] = useAtom(homeTagsAtom)
+  const [showTags] = useAtom(showHomeTagsAtom)
+
+  const [isOnline] = useAtom(isOnlineAtom)
+  const [isAuthenticated] = useAtom(authenticatedAtom)
 
   const [selectedApplication, setSelectedApplication] =
     useState<Application | null>(null)
@@ -274,13 +297,15 @@ function ApplicationsTable({
 
   return (
     <>
-      <EditApplicationModal
-        opened={opened}
-        open={open}
-        close={close}
-        application={selectedApplication}
-        callback={callback}
-      />
+      {(!isOnline && isAuthenticated) || (
+        <EditApplicationModal
+          opened={opened}
+          open={open}
+          close={close}
+          application={selectedApplication}
+          callback={callback}
+        />
+      )}
       <TextInput
         placeholder="Search by any field"
         mb="md"

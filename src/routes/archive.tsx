@@ -25,20 +25,14 @@ import {
 
 import classes from './Index.module.css'
 
-import ArchiveAPI from '../localStorage/archive'
-
 import { useDisclosure, useMediaQuery } from '@mantine/hooks'
 
 import { atom, useAtom } from 'jotai'
-import { rowsAtom, selectedArchiveRowsAtom } from '../state'
-import { downloadCSV } from '../localStorage/io'
+import { archiveApplicationsAtom, selectedArchiveRowsAtom } from '../state'
+import { downloadCSV } from '../api/localStorage/io'
 import { conditionalS } from '../utils'
 
-import {
-  Application,
-  ApplicationDTO,
-  FilterableApplication,
-} from '../types/applications'
+import { Application, FilterableApplication } from '../types/applications'
 
 import { ReactNode } from 'react'
 import { animationProps } from '../state/constants'
@@ -47,13 +41,16 @@ import { MotionContainer } from '../state/constants'
 
 import CustomPillsInput from '../components/global/CustomPillsInput'
 import ViewApplicationModal from '../components/applications/ViewApplicationModal'
+import useArchiveAPI from '@/hooks/archive'
 
 const archiveTagsAtom = atom<string[]>([])
 const showArchiveTagsAtom = atom<boolean>(false)
 
-function Home() {
-  const [applications, setApplications] = useAtom(rowsAtom)
+export default function Archive() {
+  const [applications, setApplications] = useAtom(archiveApplicationsAtom)
   const [selectedRows, setSelectedRows] = useAtom(selectedArchiveRowsAtom)
+
+  const { fetchArchive } = useArchiveAPI()
 
   const [tags, setTags] = useAtom(archiveTagsAtom)
   const [showTags, setShowTags] = useAtom(showArchiveTagsAtom)
@@ -66,12 +63,12 @@ function Home() {
   const smallScreen = useMediaQuery('(max-width: 512px)')
 
   const fillApplications = async () => {
-    const response = ArchiveAPI.fetchArchive()
-    if (!response) {
+    const response = await fetchArchive()
+    if (!response || !response.success) {
       // something went wrong
       return
     }
-    setApplications(response)
+    setApplications(Object.values(response.data))
     setSelectedRows([])
   }
 
@@ -417,5 +414,3 @@ function sortData(
     tags
   )
 }
-
-export default Home

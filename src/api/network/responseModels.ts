@@ -1,8 +1,7 @@
 type JSONSuccess<T = undefined> = {
   success: true
   msg: string
-  data: T
-}
+} & (T extends undefined | void ? {} : { data: T })
 
 type JSONFail = {
   success: false

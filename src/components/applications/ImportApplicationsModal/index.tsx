@@ -2,17 +2,27 @@ import { useDisclosure } from '@mantine/hooks'
 import { useState } from 'react'
 import { Modal, Button } from '@mantine/core'
 import { FileButton, Group, Text, Flex } from '@mantine/core'
-import { importCSV } from '../../../localStorage/io'
-import ApplicationsAPI from '../../../localStorage/applications'
+import { importCSV } from '../../../api/localStorage/io'
+import LocalApplicationsAPI from '../../../api/localStorage/applications'
+import { ApplicationStore } from '@/types/applications'
+import useApplicationsAPI from '@/hooks/applications'
+import { useAtom } from 'jotai'
+import { isOnlineAtom } from '@/state/online'
+import { authenticatedAtom } from '@/hooks/auth'
 
 export default function ImportApplicationsModal({
   callback,
 }: {
   callback: () => void
 }) {
+  const [isOnline] = useAtom(isOnlineAtom)
+  const [isAuthenticated] = useAtom(authenticatedAtom)
+
   const [opened, { open, close }] = useDisclosure(false)
   const [file, setFile] = useState<File | null>(null)
   const [error, setError] = useState('')
+
+  const { putApplications } = useApplicationsAPI()
 
   const onClose = () => {
     close()
@@ -24,9 +34,9 @@ export default function ImportApplicationsModal({
     if (!file) return
     try {
       const results = await importCSV(file)
-      for (let result of results) {
-        ApplicationsAPI.postApplication(result)
-      }
+      const mapped: ApplicationStore = {}
+      results.forEach((app) => (mapped[app.id] = app))
+      putApplications(mapped)
       onClose()
       callback()
     } catch (e) {
@@ -66,10 +76,11 @@ export default function ImportApplicationsModal({
           </Button>
         </Flex>
       </Modal>
-
-      <Button variant="default" onClick={open}>
-        Import
-      </Button>
+      {(!isOnline && isAuthenticated) || (
+        <Button variant="default" onClick={open}>
+          Import
+        </Button>
+      )}
     </>
   )
 }

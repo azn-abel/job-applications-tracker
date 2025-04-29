@@ -1,9 +1,13 @@
 import { useDisclosure } from '@mantine/hooks'
-import { Modal, Button, Flex, Text } from '@mantine/core'
-import ApplicationsAPI from '../../../localStorage/applications'
+import { Modal, Button, Flex, Text, LoadingOverlay } from '@mantine/core'
 
 import { useAtom } from 'jotai'
 import { selectedRowsAtom } from '../../../state'
+import { useState } from 'react'
+
+import { isOnlineAtom } from '@/state/online'
+import { authenticatedAtom } from '@/hooks/auth'
+import useApplicationsAPI from '@/hooks/applications'
 
 export default function DeleteSelectedApplicationModal({
   callback,
@@ -12,11 +16,20 @@ export default function DeleteSelectedApplicationModal({
 }) {
   const [opened, { open, close }] = useDisclosure(false)
 
-  const [selectedRows, setSelectedRows] = useAtom(selectedRowsAtom)
+  const [isOnline] = useAtom(isOnlineAtom)
+  const [isAuthenticated] = useAtom(authenticatedAtom)
 
-  const deleteApplications = async () => {
-    for (let row of selectedRows) {
-      ApplicationsAPI.deleteApplication(row)
+  const { deleteApplications } = useApplicationsAPI()
+
+  const [selectedRows, setSelectedRows] = useAtom(selectedRowsAtom)
+  const [loading, setLoading] = useState(false)
+
+  const removeApplications = async () => {
+    setLoading(true)
+    const result = await deleteApplications(selectedRows)
+    setLoading(false)
+    if (!result.success) {
+      // u o
     }
     setSelectedRows([])
     close()
@@ -35,6 +48,7 @@ export default function DeleteSelectedApplicationModal({
         }}
         size="md"
       >
+        <LoadingOverlay visible={loading} />
         <Text>
           Are you sure you want to delete {selectedRows.length} application
           {selectedRows.length !== 1 && 's'}?
@@ -44,15 +58,21 @@ export default function DeleteSelectedApplicationModal({
           <Button variant="default" onClick={close}>
             Back
           </Button>
-          <Button color="red" onClick={deleteApplications}>
+          <Button color="red" onClick={removeApplications}>
             Yes, I'm Sure
           </Button>
         </Flex>
       </Modal>
 
-      <Button color="red" onClick={open}>
-        Delete
-      </Button>
+      {(!isOnline && isAuthenticated) || (
+        <Button
+          color="red"
+          onClick={open}
+          disabled={!isOnline && isAuthenticated}
+        >
+          Delete
+        </Button>
+      )}
     </>
   )
 }

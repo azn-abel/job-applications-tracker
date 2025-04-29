@@ -18,7 +18,7 @@ import { Link } from 'react-router'
 import { useDisclosure } from '@mantine/hooks'
 import { motion, AnimatePresence } from 'framer-motion'
 import { animationProps } from '../../../state/constants'
-import { requestLogout } from '@/api/auth'
+import { requestLogout } from '@/api/network/auth'
 import { authenticatedAtom } from '@/hooks/auth'
 import { useAtom } from 'jotai'
 
@@ -79,15 +79,17 @@ export default function Heading() {
         </Link>
         <Group gap={5} visibleFrom="xs">
           {items}
-          {isOnline &&
-            (isAuthenticated ? (
-              <LogoutButton callback={logout} />
-            ) : (
-              <GoogleSignInButton />
-            ))}
+          {isAuthenticated ? (
+            <LogoutButton callback={logout} disabled={!isOnline} />
+          ) : (
+            isOnline && <GoogleSignInButton />
+          )}
           <Avatar ml={8} src={user?.picture} />
         </Group>
-        <Burger opened={opened} onClick={toggle} hiddenFrom="xs" size="sm" />
+        <Group hiddenFrom="xs">
+          <Avatar src={user?.picture} />
+          <Burger opened={opened} onClick={toggle} size="sm" />
+        </Group>
         <AnimatePresence>
           {opened && (
             <MotionCard
@@ -106,13 +108,11 @@ export default function Heading() {
                 bg={'white'}
               >
                 {items}
-                {isOnline &&
-                  (isAuthenticated ? (
-                    <LogoutButton callback={logout} />
-                  ) : (
-                    <GoogleSignInButton />
-                  ))}
-                <Avatar src={user?.picture} />
+                {isAuthenticated ? (
+                  <LogoutButton callback={logout} disabled={!isOnline} />
+                ) : (
+                  isOnline && <GoogleSignInButton />
+                )}
               </Flex>
             </MotionCard>
           )}
@@ -122,7 +122,13 @@ export default function Heading() {
   )
 }
 
-function LogoutButton({ callback }: { callback: () => void }) {
+function LogoutButton({
+  callback,
+  disabled,
+}: {
+  callback: () => void
+  disabled: boolean
+}) {
   return (
     <Button
       className={classes.button}
@@ -131,6 +137,7 @@ function LogoutButton({ callback }: { callback: () => void }) {
       onClick={() => {
         callback()
       }}
+      disabled={disabled}
       miw={90}
     >
       Sign Out

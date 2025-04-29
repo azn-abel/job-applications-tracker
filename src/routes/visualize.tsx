@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
-import { Flex, Title } from '@mantine/core'
-import ApplicationsAPI from '../localStorage/applications'
+import { Container, Flex, Title } from '@mantine/core'
+import LocalApplicationsAPI from '../api/localStorage/applications'
 
 import SankeyChart from '../components/SankeyChart/sankey'
 import CustomBarChart from '../components/CustomBarChart'
@@ -10,16 +10,21 @@ import { Application } from '../types/applications'
 
 import { animationProps, MotionFlex, MotionContainer } from '../state/constants'
 import { useMediaQuery } from '@mantine/hooks'
+import { homeApplicationsAtom } from '@/state'
+import { useAtom } from 'jotai'
+import useApplicationsAPI from '@/hooks/applications'
 
 export default function Visualize() {
   const smallScreen = useMediaQuery('(max-width: 512px)')
 
   const [loading, setLoading] = useState(true)
 
-  const [applications, setApplications] = useState<Application[]>([])
+  const [applications, setApplications] = useAtom(homeApplicationsAtom)
   const [interviews, setInterviews] = useState<Application[]>([])
   const [offers, setOffers] = useState<Application[]>([])
   const [noResponse, setNoResponse] = useState<Application[]>([])
+
+  const { fetchApplications } = useApplicationsAPI()
 
   const [rejectionsNoInterview, setRejectionsNoInterview] = useState<
     Application[]
@@ -34,9 +39,16 @@ export default function Visualize() {
     []
   )
 
-  useEffect(() => {
-    const data = ApplicationsAPI.fetchApplications()
-
+  const onMount = async () => {
+    let data: Application[] = applications
+    if (data.length === 0) {
+      const result = await fetchApplications()
+      if (!result.success) {
+        // Sumn went wrong
+        return
+      }
+      data = Object.values(result.data)
+    }
     setApplications(data)
     setInterviews(
       data.filter(
@@ -62,7 +74,13 @@ export default function Visualize() {
     )
 
     setLoading(false)
+  }
+
+  useEffect(() => {
+    onMount()
   }, [])
+
+  if (loading) return <></>
 
   return (
     <>
