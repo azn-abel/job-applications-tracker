@@ -63,6 +63,7 @@ export default function Archive() {
   const smallScreen = useMediaQuery('(max-width: 512px)')
 
   const fillApplications = async () => {
+    console.log('called')
     const response = await fetchArchive()
     if (!response || !response.success) {
       // something went wrong
