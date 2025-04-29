@@ -65,6 +65,7 @@ export default function Archive() {
   const fillApplications = async () => {
     console.log('called')
     const response = await fetchArchive()
+    console.log(response)
     if (!response || !response.success) {
       // something went wrong
       return
