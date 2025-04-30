@@ -13,7 +13,7 @@ import useArchiveAPI from '@/hooks/archive'
 export default function ArchiveCollectionModal({
   callback,
 }: {
-  callback: () => void
+  callback: () => Promise<void>
 }) {
   const [isOnline] = useAtom(isOnlineAtom)
   const [isAuthenticated] = useAtom(authenticatedAtom)
@@ -25,14 +25,18 @@ export default function ArchiveCollectionModal({
 
   const [rows] = useAtom(selectedRowsAtom)
 
+  const [loading, setLoading] = useState(false)
+
   const [archiveRows, setArchiveRows] = useAtom(archiveApplicationsAtom)
 
   const archiveCollection = async () => {
+    setLoading(true)
     setError('')
     const postResponse = await postToArchive(rows)
 
     if (!postResponse.success) {
       setError(postResponse.detail)
+      setLoading(false)
       return
     }
 
@@ -40,11 +44,13 @@ export default function ArchiveCollectionModal({
 
     if (!fetchResponse.success) {
       setError(fetchResponse.detail)
+      setLoading(false)
       return
     }
     setArchiveRows(Object.values(fetchResponse.data))
+    await callback()
+    setLoading(false)
     close()
-    callback()
   }
 
   const onClose = () => {

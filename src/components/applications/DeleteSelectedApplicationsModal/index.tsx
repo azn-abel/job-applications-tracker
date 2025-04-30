@@ -12,7 +12,7 @@ import useApplicationsAPI from '@/hooks/applications'
 export default function DeleteSelectedApplicationModal({
   callback,
 }: {
-  callback: () => void
+  callback: () => Promise<void>
 }) {
   const [opened, { open, close }] = useDisclosure(false)
 
@@ -27,13 +27,13 @@ export default function DeleteSelectedApplicationModal({
   const removeApplications = async () => {
     setLoading(true)
     const result = await deleteApplications(selectedRows)
-    setLoading(false)
     if (!result.success) {
       // u o
     }
     setSelectedRows([])
     close()
-    callback()
+    await callback()
+    setLoading(false)
   }
 
   return (
