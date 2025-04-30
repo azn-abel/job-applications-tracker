@@ -1,5 +1,5 @@
 import { useDisclosure } from '@mantine/hooks'
-import { Modal, Button, Flex, Text } from '@mantine/core'
+import { Modal, Button, Flex, Text, LoadingOverlay } from '@mantine/core'
 
 import { useState } from 'react'
 
@@ -70,6 +70,7 @@ export default function ArchiveCollectionModal({
         }}
         size="md"
       >
+        <LoadingOverlay visible={loading} />
         <Flex direction="column" gap={12}>
           <Text>This action cannot be undone.</Text>
           <Text>
