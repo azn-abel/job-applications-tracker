@@ -34,21 +34,20 @@ export default function useAuth() {
     }
 
     initializeAuth()
-
-    return () => {
-      console.log('unmount')
-    }
   }, [])
 
   const login = async (token: string) => {
+    setIsLoading(true)
     const response = await sendGoogleToken(token)
     if (response.success) {
       setUser(response.data)
       setIsAuthenticated(true)
     }
+    setIsLoading(false)
     return response
   }
   const logout = async () => {
+    setIsLoading(true)
     const response = await requestLogout()
     if (response.success) {
       setUser(null)
@@ -56,6 +55,7 @@ export default function useAuth() {
       setHomeApplications([])
       setIsAuthenticated(false)
     }
+    setIsLoading(false)
   }
 
   return { user, isAuthenticated, isLoading, login, logout }

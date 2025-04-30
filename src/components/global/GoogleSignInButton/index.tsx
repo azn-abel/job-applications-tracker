@@ -26,7 +26,6 @@ export default function GoogleSignInButton() {
     script.async = true
     script.defer = true
     script.onload = () => {
-      console.log(window.location.origin)
       if (window.google && buttonDivRef.current) {
         window.google.accounts.id.initialize({
           client_id:
@@ -38,7 +37,6 @@ export default function GoogleSignInButton() {
           prompt_parent_id: '',
           callback: async (response) => {
             // TODO: prompt user to sync applications from remote to local
-            console.log(response.credential)
             await login(response.credential)
           },
         })
